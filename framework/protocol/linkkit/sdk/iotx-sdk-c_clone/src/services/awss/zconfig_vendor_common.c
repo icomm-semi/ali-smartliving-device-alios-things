@@ -12,6 +12,7 @@
 #include "zconfig_utils.h"
 #include "zconfig_protocol.h"
 #include "zconfig_ieee80211.h"
+#include "awss_info_notify.h"
 #include "awss_enrollee.h"
 #include "awss_event.h"
 #include "awss_timer.h"
@@ -329,7 +330,7 @@ rescanning:
         if (aws_state != AWS_SCANNING)  // channel is locked, don't need to tx probe req
             break;
 
-        int interval = (os_awss_get_channelscan_interval_ms() + 2) / 3;
+        int interval = (os_awss_get_channelscan_interval_ms() + 2) / 4;
         if (interval < 1)
             interval = 1;
 
@@ -342,6 +343,8 @@ rescanning:
 #ifdef AWSS_SUPPORT_ADHA
         aws_send_adha_probe_req();
 #endif
+        os_msleep(interval);
+        aws_send_info_notify();
         os_msleep(interval);
 #ifdef AWSS_SUPPORT_AHA
         aws_send_aha_probe_req();
