@@ -23,8 +23,8 @@ uart_dev_t uart_0;
 extern uint32_t *fetch_ali_context();
 
 
-uint8_t const m_secret[40] = "sFqTYrjneyyEUlhbZpdOwsDPmShLwMNH8ZHdqLWL";
-static uint8_t m_addr[BD_ADDR_LEN] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
+uint8_t const m_secret[40] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; /* Todo: add correct secret here! */
+static uint8_t m_addr[BD_ADDR_LEN] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06}; /* Todo: add correct address here! */
 
 #define MOD "aisapp"
 
