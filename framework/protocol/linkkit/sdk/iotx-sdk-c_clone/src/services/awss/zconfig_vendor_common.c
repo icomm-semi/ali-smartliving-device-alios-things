@@ -329,8 +329,11 @@ rescanning:
 
         if (aws_state != AWS_SCANNING)  // channel is locked, don't need to tx probe req
             break;
-
+#ifdef AWSS_SUPPORT_SMARTCONFIG_NOTIFY
         int interval = (os_awss_get_channelscan_interval_ms() + 2) / 4;
+#else
+        int interval = (os_awss_get_channelscan_interval_ms() + 2) / 3;
+#endif
         if (interval < 1)
             interval = 1;
 
@@ -344,8 +347,10 @@ rescanning:
         aws_send_adha_probe_req();
 #endif
         os_msleep(interval);
+#ifdef AWSS_SUPPORT_SMARTCONFIG_NOTIFY
         aws_send_info_notify();
         os_msleep(interval);
+#endif
 #ifdef AWSS_SUPPORT_AHA
         aws_send_aha_probe_req();
 #endif
