@@ -32,6 +32,8 @@ $Recycle.Bin
 .sconsign.dblite
 ckhobbit*.map
 projects/autogen/*
+framework/protocol/linkkit/sdk/iotx-sdk-c_clone/ENV_VARS.tmp
+framework/protocol/linkkit/sdk/iotx-sdk-c_clone/objlist.tmp
 # source sight project files
 *.IAB
 *.IAD
