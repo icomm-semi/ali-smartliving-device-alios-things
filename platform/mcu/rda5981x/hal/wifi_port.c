@@ -2,13 +2,13 @@
  * Copyright (C) 2015-2017 Alibaba Group Holding Limited
  */
 
-#include "hfilop.h"
 #include "rda59xx_daemon.h"
 #include "rda59xx_wifi_include.h"
 #include "hal/wifi.h"
 #include "lwip/ip4_addr.h"
 #include "lwip/inet.h"
 #ifndef DELETE_HFILOP_CODE
+#include "hfilop.h"
 #include "ota_hal_plat.h"
 #endif
 
