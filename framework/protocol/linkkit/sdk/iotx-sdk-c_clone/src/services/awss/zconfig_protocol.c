@@ -149,7 +149,7 @@ uint8_t zconfig_callback_channel_locked(uint8_t channel)
     return 0;
 }
 
-uint8_t zconfig_callback_over(uint8_t *ssid, uint8_t *passwd, uint8_t *bssid)
+uint8_t zconfig_callback_over(uint8_t *ssid, uint8_t *passwd, uint8_t *bssid, uint8_t *token)
 {
     uint8_t auth = ZC_AUTH_TYPE_INVALID, encry = ZC_ENC_TYPE_INVALID, channel = 0;
 
@@ -164,7 +164,7 @@ uint8_t zconfig_callback_over(uint8_t *ssid, uint8_t *passwd, uint8_t *bssid)
     awss_get_auth_info(ssid, bssid, &auth, &encry, &channel);
 #endif
 
-    zconfig_got_ssid_passwd_callback(ssid, passwd, bssid, auth, encry, channel);
+    zconfig_got_ssid_passwd_callback(ssid, passwd, bssid, token, auth, encry, channel);
 
     zconfig_finished = 1;
 
@@ -184,6 +184,9 @@ void zconfig_set_state(uint8_t state, uint8_t tods, uint8_t channel)
             zconfig_callback_channel_locked(channel);
             break;
         case STATE_CHN_LOCKED_BY_BR:
+#ifdef AWSS_SUPPORT_SMARTCONFIG_MCAST
+        case STATE_CHN_LOCKED_BY_MCAST:
+#endif
             //locked state used by br frame
             zconfig_callback_channel_locked(zc_channel ? zc_channel : channel);
             break;
@@ -197,7 +200,7 @@ void zconfig_set_state(uint8_t state, uint8_t tods, uint8_t channel)
             if (!is_channel_locked()) {
                 zconfig_callback_channel_locked(channel);
             }
-            zconfig_callback_over(zc_ssid, zc_passwd, zc_bssid);
+            zconfig_callback_over(zc_ssid, zc_passwd, zc_bssid, zc_token);
             break;
         default:
             break;

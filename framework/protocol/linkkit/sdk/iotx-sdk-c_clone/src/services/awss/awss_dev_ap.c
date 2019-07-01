@@ -16,7 +16,7 @@
 #include "awss_crypt.h"
 #include "awss_statis.h"
 #include "zconfig_utils.h"
-
+#include "connect_ap.h"
 #ifdef AWSS_SUPPORT_DEV_AP
 
 #if defined(__cplusplus)  /* If this is a C++ compiler, use C linkage */
@@ -29,14 +29,17 @@ typedef struct {
     char ssid[PLATFORM_MAX_SSID_LEN + 1];
     char passwd[PLATFORM_MAX_PASSWD_LEN + 1];
     uint8_t bssid[ETH_ALEN];
+    uint8_t token[RANDOM_MAX_LEN + 1];
     uint16_t msgid;
     uint8_t cnt;
+    uint8_t token_found;
     uint8_t got_msg;
 } ap_info_t;
 
+static int sart_connect_ap(char *ssid, char *pwd, uint8_t *bssid, uint8_t *token, uint16_t msgid);
+static void do_connect_ap(void);
+
 static ap_info_t  *ap_info_ptr = NULL;
-static int start_connect_ap(char *ssid, char *pwd, uint8_t *bssid, uint16_t msgid);
-static void do_connect_ap();
 static void *g_awss_dev_ap_mutex = NULL;
 static char awss_dev_ap_switchap_done = 0;
 static char awss_dev_ap_switchap_resp_suc = 0;
@@ -95,11 +98,9 @@ int awss_dev_ap_start(void)
 
     while (awss_dev_ap_ongoing) {
         os_msleep(200);
-
         if (awss_dev_ap_switchap_done) {
             break;
         }
-
         do_connect_ap();
     }
     HAL_MutexUnlock(g_awss_dev_ap_mutex);
@@ -177,6 +178,8 @@ int wifimgr_process_dev_ap_switchap_request(void *ctx, void *resource, void *rem
     char *str = NULL, *buf = NULL;
     char bssid[ETH_ALEN] = {0};
     char ssid_found = 0;
+    uint8_t token[RANDOM_MAX_LEN + 1];
+    char token_found = 0;
     int ret = -1;
 
     static char dev_ap_switchap_parsed = 0;
@@ -249,6 +252,13 @@ int wifimgr_process_dev_ap_switchap_request(void *ctx, void *resource, void *rem
         }
 
         str_len = 0;
+        str = json_get_value_by_name(buf, len, "token", &str_len, 0);
+        if (str && str_len ==  RANDOM_MAX_LEN * 2) {  /* token len equal to random len */
+            utils_str_to_hex(str, str_len, (unsigned char *)token, RANDOM_MAX_LEN);
+            token_found = 1;
+        }
+
+        str_len = 0;
         str = json_get_value_by_name(buf, len, "bssid", &str_len, 0);
         if (str) {
             os_wifi_str2mac(str, bssid);
@@ -288,7 +298,7 @@ int wifimgr_process_dev_ap_switchap_request(void *ctx, void *resource, void *rem
         goto DEV_AP_SWITCHAP_END;
     }
 
-    ret = start_connect_ap(ssid, passwd, (uint8_t *)bssid, msgid);
+    ret = sart_connect_ap(ssid, passwd, (uint8_t *)bssid, token_found ? token : NULL, msgid);
     awss_trace("ready connect ap '%s' %s\r\n", ssid, ret == 0 ? "success" : "fail");
 
 DEV_AP_SWITCHAP_END:
@@ -302,7 +312,7 @@ DEV_AP_SWITCHAP_END:
     return ret;
 }
 
-static void do_connect_ap()
+static void do_connect_ap(void)
 {
     int ret;
     if (ap_info_ptr == NULL) {
@@ -324,8 +334,10 @@ static void do_connect_ap()
         AWSS_UPDATE_STATIS(AWSS_STATIS_CONN_ROUTER_IDX, AWSS_STATIS_TYPE_TIME_START);
         os_awss_close_ap();
 
-        ret = os_awss_connect_ap(WLAN_CONNECTION_TIMEOUT_MS, ap_info_ptr->ssid, ap_info_ptr->passwd, 0, 0, ap_info_ptr->bssid,
-                                 0);
+        /*ret = os_awss_connect_ap(WLAN_CONNECTION_TIMEOUT_MS, info->ssid, info->passwd, 0, 0, info->bssid, 0);*/
+        ret = awss_connect(ap_info_ptr->ssid, ap_info_ptr->passwd, ap_info_ptr->bssid, ETH_ALEN,
+                           ap_info_ptr->token_found == 1 ? ap_info_ptr->token : NULL,
+                           ap_info_ptr->token_found == 1 ? RANDOM_MAX_LEN : 0);
         if (ret == 0) {
             AWSS_UPDATE_STATIS(AWSS_STATIS_CONN_ROUTER_IDX, AWSS_STATIS_TYPE_TIME_SUC);
             awss_dev_ap_switchap_done = 1;
@@ -338,15 +350,20 @@ static void do_connect_ap()
     }
 
     awss_info("wait siwtchap resp ack,cnt = %d\r\n", ap_info_ptr->cnt);
+
 }
 
-static int start_connect_ap(char *ssid, char *pwd, uint8_t *bssid, uint16_t msgid)
+static int sart_connect_ap(char *ssid, char *pwd, uint8_t *bssid, uint8_t *token, uint16_t msgid)
 {
-
     if (ap_info_ptr == NULL) {
         return -1;
     }
+
     memset(ap_info_ptr, 0, sizeof(ap_info_t));
+    if (token != NULL) {
+        memcpy(ap_info_ptr->token, token, sizeof(ap_info_ptr->token));
+        ap_info_ptr->token_found = 1;
+    }
     strncpy(ap_info_ptr->ssid, ssid, sizeof(ap_info_ptr->ssid) - 1);
     strncpy(ap_info_ptr->passwd, pwd, sizeof(ap_info_ptr->passwd) - 1);
     memcpy(ap_info_ptr->bssid, bssid, sizeof(ap_info_ptr->bssid));

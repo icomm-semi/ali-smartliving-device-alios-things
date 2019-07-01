@@ -773,7 +773,12 @@ struct awss_protocol_couple_type awss_protocol_couple_array[] = {
     {ALINK_WPS,          awss_ieee80211_wps_process,         awss_recv_callback_wps},
 #endif
 #ifdef AWSS_SUPPORT_SMARTCONFIG
+#ifdef AWSS_SUPPORT_SMARTCONFIG_MCAST
+    {ALINK_BROADCAST,    awss_ieee80211_smartconfig_process, awss_recv_callback_smartconfig},
+    {ALINK_BROADCAST,    awss_ieee80211_mcast_smartconfig_process, awss_recv_callback_mcast_smartconfig}
+#else
     {ALINK_BROADCAST,    awss_ieee80211_smartconfig_process, awss_recv_callback_smartconfig}
+#endif
 #endif
 };
 

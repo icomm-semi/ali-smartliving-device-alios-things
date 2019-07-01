@@ -9,11 +9,18 @@
 #include "awss_utils.h"
 
 #if defined(__cplusplus)  /* If this is a C++ compiler, use C linkage */
-extern "C"
-{
+extern "C" {
 #endif
 
 uint8_t aes_random[RANDOM_MAX_LEN] = {0};
+
+int awss_set_token(uint8_t token[RANDOM_MAX_LEN])
+{
+    if (token != NULL) {
+        memcpy(aes_random, token, RANDOM_MAX_LEN);
+    }
+    return 0;
+}
 #ifdef WIFI_PROVISION_ENABLED
 /*
  * 1. place 0 @ 0, because of java modified-UTF8
@@ -106,11 +113,13 @@ int awss_dict_crypt(char tab_idx, uint8_t *data, uint8_t len)
             break;
     }
 
-    if (table == NULL || data == NULL)
+    if (table == NULL || data == NULL) {
         return -1;
+    }
 
-    for (i = 0; i < len; i ++)
+    for (i = 0; i < len; i ++) {
         data[i] = table[data[i]];
+    }
 
     return 0;
 }
@@ -118,11 +127,12 @@ int awss_dict_crypt(char tab_idx, uint8_t *data, uint8_t len)
 int produce_signature(uint8_t *sign, uint8_t *txt,
                       uint32_t txt_len, const char *key)
 {
-    if (sign == NULL || txt == NULL || txt_len == 0 || key == NULL)
+    if (sign == NULL || txt == NULL || txt_len == 0 || key == NULL) {
         return -1;
+    }
 
     utils_hmac_sha1_hex((const char *)txt, (int)txt_len,
-                    (char *)sign, key, strlen(key));
+                        (char *)sign, key, strlen(key));
 
     return 0;
 }
