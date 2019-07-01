@@ -8,10 +8,11 @@ HOST_ARCH            := Cortex-M4
 HOST_MCU_FAMILY      := rda5981x
 
 $(NAME)_SOURCES := board.c    \
+                   hal_pwm.c \
                    startup_hf-lpt230.s
 
 GLOBAL_INCLUDES += . \
-				   hfilop
+		   hfilop
 
 GLOBAL_DEFINES  += STDIO_UART=0
 GLOBAL_DEFINES  += RHINO_CONFIG_TICK_TASK=0 RHINO_CONFIG_WORKQUEUE=0

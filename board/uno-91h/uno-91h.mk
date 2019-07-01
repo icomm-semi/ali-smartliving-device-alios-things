@@ -8,6 +8,7 @@ HOST_ARCH            := Cortex-M4
 HOST_MCU_FAMILY      := rda5981x
 
 $(NAME)_SOURCES := board.c    \
+                   hal_pwm.c \
                    startup_uno-91h.s
 
 GLOBAL_INCLUDES += .
