@@ -36,7 +36,7 @@ typedef struct {
     uint8_t got_msg;
 } ap_info_t;
 
-static int sart_connect_ap(char *ssid, char *pwd, uint8_t *bssid, uint8_t *token, uint16_t msgid);
+static int start_connect_ap(char *ssid, char *pwd, uint8_t *bssid, uint8_t *token, uint16_t msgid);
 static void do_connect_ap(void);
 
 static ap_info_t  *ap_info_ptr = NULL;
@@ -298,7 +298,7 @@ int wifimgr_process_dev_ap_switchap_request(void *ctx, void *resource, void *rem
         goto DEV_AP_SWITCHAP_END;
     }
 
-    ret = sart_connect_ap(ssid, passwd, (uint8_t *)bssid, token_found ? token : NULL, msgid);
+    ret = start_connect_ap(ssid, passwd, (uint8_t *)bssid, token_found ? token : NULL, msgid);
     awss_trace("ready connect ap '%s' %s\r\n", ssid, ret == 0 ? "success" : "fail");
 
 DEV_AP_SWITCHAP_END:
@@ -353,7 +353,7 @@ static void do_connect_ap(void)
 
 }
 
-static int sart_connect_ap(char *ssid, char *pwd, uint8_t *bssid, uint8_t *token, uint16_t msgid)
+static int start_connect_ap(char *ssid, char *pwd, uint8_t *bssid, uint8_t *token, uint16_t msgid)
 {
     if (ap_info_ptr == NULL) {
         return -1;
