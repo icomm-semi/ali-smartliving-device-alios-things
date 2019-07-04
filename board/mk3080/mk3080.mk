@@ -3,10 +3,12 @@ NAME := board_mk3080
 JTAG := jlink_swd
 
 $(NAME)_TYPE := kernel
-MODULE               := AmebaZ
+MODULE               := EMW3080
 HOST_ARCH            := Cortex-M4
 HOST_MCU_FAMILY      := rtl8710bn
 SUPPORT_BINS         := no
+
+EXTRA_ATE_BIN        := on
 
 $(NAME)_SOURCES := board.c
 

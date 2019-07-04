@@ -37,7 +37,7 @@ BOOT_BIN_FILE    := $(OUTPUT_DIR)/binary/boot_all.bin
 BOOT_OFFSET      := 0x0
 
 #application 
-SYSTEM_BIN_FILE :=board/mk3080/system.bin
+SYSTEM_BIN_FILE :=board/$(PLATFORM)/system.bin
 SYSTEM_OFFSET:= 0x9000
 
 #application 
@@ -45,7 +45,7 @@ APP_BIN_FILE :=$(OUTPUT_DIR)/binary/image2_all_ota1.bin
 APP_OFFSET:= 0xB000
 
 #ate firmware
-ATE_BIN_FILE := board/mk3080/ate.bin
+ATE_BIN_FILE := board/$(PLATFORM)/ate.bin
 ATE_OFFSET:= 0xD0000
 
 # Required to build Full binary file
@@ -53,6 +53,7 @@ GEN_COMMON_BIN_OUTPUT_FILE_SCRIPT:= $(SCRIPTS_PATH)/gen_common_bin_output_file.p
 
 MOC_ALL_BIN_OUTPUT_FILE :=$(LINK_OUTPUT_FILE:$(LINK_OUTPUT_SUFFIX)=.all$(BIN_OUTPUT_SUFFIX))
 
+ifeq (EXTRA_ATE_BIN, on)
 gen_standard_images: gen_crc_bin
 	$(QUIET)$(ECHO) Generate Standard Flash Images: $(MOC_ALL_BIN_OUTPUT_FILE)
 	$(QUIET)$(RM) $(MOC_ALL_BIN_OUTPUT_FILE)
@@ -60,4 +61,11 @@ gen_standard_images: gen_crc_bin
 	$(PYTHON) $(GEN_COMMON_BIN_OUTPUT_FILE_SCRIPT) -o $(MOC_ALL_BIN_OUTPUT_FILE) -f $(SYSTEM_OFFSET)  $(SYSTEM_BIN_FILE)
 	$(PYTHON) $(GEN_COMMON_BIN_OUTPUT_FILE_SCRIPT) -o $(MOC_ALL_BIN_OUTPUT_FILE) -f $(APP_OFFSET)  $(APP_BIN_FILE)
 	$(PYTHON) $(GEN_COMMON_BIN_OUTPUT_FILE_SCRIPT) -o $(MOC_ALL_BIN_OUTPUT_FILE) -f $(ATE_OFFSET)  $(ATE_BIN_FILE)
-
+else
+gen_standard_images: gen_crc_bin
+	$(QUIET)$(ECHO) Generate Standard Flash Images: $(MOC_ALL_BIN_OUTPUT_FILE)
+	$(QUIET)$(RM) $(MOC_ALL_BIN_OUTPUT_FILE)
+	$(PYTHON) $(GEN_COMMON_BIN_OUTPUT_FILE_SCRIPT) -o $(MOC_ALL_BIN_OUTPUT_FILE) -f $(BOOT_OFFSET) $(BOOT_BIN_FILE)              
+	$(PYTHON) $(GEN_COMMON_BIN_OUTPUT_FILE_SCRIPT) -o $(MOC_ALL_BIN_OUTPUT_FILE) -f $(SYSTEM_OFFSET)  $(SYSTEM_BIN_FILE)
+	$(PYTHON) $(GEN_COMMON_BIN_OUTPUT_FILE_SCRIPT) -o $(MOC_ALL_BIN_OUTPUT_FILE) -f $(APP_OFFSET)  $(APP_BIN_FILE)
+endif
