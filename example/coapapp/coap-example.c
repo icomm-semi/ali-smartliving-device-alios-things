@@ -27,16 +27,17 @@
 #include "iot_import.h"
 #include "iot_export.h"
 
-#define IOTX_DAILY_DTLS_SERVER_URI      "coaps://10.125.7.82:5684"
-//#define IOTX_DAILY_DTLS_SERVER_URI      "coaps://iot-as-coap.alibaba.net:5684"
-#define IOTX_DAILY_PSK_SERVER_URI       "coap-psk://10.101.83.159:5683"
-#define IOTX_PRE_DTLS_SERVER_URI        "coaps://pre.iot-as-coap.cn-shanghai.aliyuncs.com:5684"
-#define IOTX_PRE_NOSEC_SERVER_URI       "coap://pre.iot-as-coap.cn-shanghai.aliyuncs.com:5683"
-#define IOTX_PRE_PSK_SERVER_URI         "coap-psk://pre.iot-as-coap.cn-shanghai.aliyuncs.com:5683"
+#define IOTX_DAILY_DTLS_SERVER_URI      "coaps://11.239.164.238:5684"
+#define IOTX_DAILY_PSK_SERVER_URI       "coap-psk://10.101.83.159:5682"
 
+#define IOTX_PRE_DTLS_SERVER_URI        "coaps://pre.coap.cn-shanghai.link.aliyuncs.com:5684"
+#define IOTX_PRE_NOSEC_SERVER_URI       "coap://pre.coap.cn-shanghai.link.aliyuncs.com:5683"
+#define IOTX_PRE_PSK_SERVER_URI         "coap-psk://pre.coap.cn-shanghai.link.aliyuncs.com:5683"
 
-#define IOTX_ONLINE_DTLS_SERVER_URL     "coaps://%s.iot-as-coap.cn-shanghai.aliyuncs.com:5684"
-#define IOTX_ONLINE_PSK_SERVER_URL      "coap-psk://%s.iot-as-coap.cn-shanghai.aliyuncs.com:5683"
+/* online url */
+#define IOTX_ONLINE_DTLS_SERVER_URL     "coaps://%s.coap.cn-shanghai.link.aliyuncs.com:5684"
+#define IOTX_ONLINE_NOSEC_SERVER_URI    "coap://%s.coap.cn-shanghai.link.aliyuncs.com:5683"
+#define IOTX_ONLINE_PSK_SERVER_URL      "coap-psk://%s.coap.cn-shanghai.link.aliyuncs.com:5682"
 
 //char m_coap_client_running = 1;
 char m_coap_reconnect = 0;
@@ -121,7 +122,7 @@ void show_usage()
     HAL_Printf("\t-h                 \t\tShow this usage.\r\n");
 }
 
-#define SECUR    "dtls"
+#define SECUR    "psk"
 #define ENV      "online"
 #define TEST_CNT 100
 void iotx_main(void *p)
