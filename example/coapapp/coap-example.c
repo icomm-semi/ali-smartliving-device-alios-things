@@ -106,7 +106,7 @@ static void iotx_post_data_to_server(void *param)
     iotx_coap_context_t *p_ctx = (iotx_coap_context_t *)param;
 
     iotx_set_devinfo(&devinfo);
-    snprintf(path, IOTX_URI_MAX_LEN, "/topic/%s/%s/update/", (char *)devinfo.product_key,
+    snprintf(path, IOTX_URI_MAX_LEN, "/topic/sys/%s/%s/thing/deviceinfo/update/", (char *)devinfo.product_key,
              (char *)devinfo.device_name);
 
     IOT_CoAP_SendMessage(p_ctx, path, &message);
@@ -191,6 +191,7 @@ void iotx_main(void *p)
 
     iotx_coap_context_t *p_ctx = NULL;
 
+    m_coap_reconnect = 1;
 reconnect:
     p_ctx = IOT_CoAP_Init(&config);
     if (NULL != p_ctx) {
@@ -210,7 +211,6 @@ reconnect:
         HAL_Printf("IoTx CoAP init failed\r\n");
     }
     if(m_coap_reconnect){
-        m_coap_reconnect = 0;
         goto reconnect;
     }
 
