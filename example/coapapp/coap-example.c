@@ -131,6 +131,8 @@ void iotx_main(void *p)
     iotx_coap_config_t      config;
     iotx_deviceinfo_t       deviceinfo;
     int test_cnt = 0;
+    char url[256] = {0};
+
     /**< set device info*/
     HAL_SetProductKey(IOTX_PRODUCT_KEY);
     HAL_SetDeviceName(IOTX_DEVICE_NAME);
@@ -155,12 +157,10 @@ void iotx_main(void *p)
         }
     } else if (0 == strncmp(ENV, "online", strlen("online"))) {
         if (0 == strncmp(SECUR, "dtls", strlen("dtls"))) {
-            char url[256] = {0};
             snprintf(url, sizeof(url), IOTX_ONLINE_DTLS_SERVER_URL, IOTX_PRODUCT_KEY);
             config.p_url = url;
         }
         else if(0 == strncmp(SECUR, "psk", strlen("psk"))){
-            char url[256] = {0};
             snprintf(url, sizeof(url), IOTX_ONLINE_PSK_SERVER_URL, IOTX_PRODUCT_KEY);
             config.p_url = url;
 
@@ -206,6 +206,7 @@ reconnect:
             aos_msleep(200);
         } while (test_cnt++<TEST_CNT);
 
+        m_coap_reconnect = 0;
         IOT_CoAP_Deinit(&p_ctx);
     } else {
         HAL_Printf("IoTx CoAP init failed\r\n");
