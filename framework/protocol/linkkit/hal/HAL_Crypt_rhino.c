@@ -6,9 +6,12 @@
 #include <aos/aos.h>
 #include "iot_import.h"
 #include "ali_crypto.h"
-#include "mbedtls/aes.h"
-#include "infra_aes.h"
 
+#if defined(INFRA_AES)
+    #include "infra_aes.h"
+#else
+    #include "mbedtls/aes.h"
+#endif
 
 typedef struct {
 #if defined(INFRA_AES)
@@ -19,7 +22,6 @@ typedef struct {
     uint8_t iv[16];
     uint8_t key[16];
 } platform_aes_t;
-
 
 p_HAL_Aes128_t HAL_Aes128_Init(
             const uint8_t *key,
