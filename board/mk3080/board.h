@@ -10,7 +10,7 @@ extern "C"
 
 
 #define HARDWARE_REVISION   "V1.0"
-#define MODEL               "MK3080"
+#define MODEL               "EMW3080"
 
 #ifdef BOOTLOADER
 #define STDIO_UART 0

@@ -1,5 +1,5 @@
 #define HARDWARE_REVISION   "V1.0"
-#define MODEL               "HF-LPT230"
+#define MODEL               "HF-LPB130"
 
 #ifdef BOOTLOADER
 #define STDIO_UART 0
