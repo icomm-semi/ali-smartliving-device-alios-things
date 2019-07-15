@@ -183,6 +183,10 @@ int wifimgr_process_dev_ap_switchap_request(void *ctx, void *resource, void *rem
     int ret = -1;
 
     static char dev_ap_switchap_parsed = 0;
+    if (0 == awss_dev_ap_ongoing) {
+        awss_trace("dev ap: not in awss mode!\r\n");
+        return -1;
+    }
     if (dev_ap_switchap_parsed != 0) {
         goto DEV_AP_SWITCHAP_END;
     }
