@@ -1,74 +1,19 @@
-# <img src="http://o7spigzvd.bkt.clouddn.com/aos-logo-compact-1502x272.png" height="60">
+## 版本发布说明
+飞燕SDK1.0.0 for AliOS Things  
+本次发布的是包含飞燕SDK 1.0.0版本的AliOS版本。
 
-[![Join the chat at https://gitter.im/aliosthings/Lobby](https://img.shields.io/gitter/room/aliosthings/Lobby.svg?style=flat-square)](https://gitter.im/aliosthings/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+版本号 | 发布日期 | 下载链接 | 
+:-: | :-: | :-: |
+1.0.0 | 20190715 | [下载](https://code.aliyun.com/living_platform/feiyan_sdk_for_alios/repository/archive.zip?ref=rel_1.0.0 "飞燕1.0.0版本") | 
+更新内容：  
+集成飞燕SDK 1.0.0版本
 
-[EN](#alios-things) | [中文](#alios-things概述)
+## 文档链接
+[生活物联网平台(飞燕平台)官网](https://iot.aliyun.com/products/livinglink)  
+[飞燕平台文档中心](https://living.aliyun.com/doc#index.html)  
+[使用AliOS Things WiFi认证模组进行单品设备开发](https://living.aliyun.com/doc?#certificated_wifi.html)  
+[更多AliOS Things相关资料](https://github.com/alibaba/AliOS-Things/wiki)
 
-AliOS Things is Alibaba's IoT version of AliOS Family, it was announced in [The Computing Conference 2017](https://yunqi.aliyun.com) in Hangzhou by Alibaba Cloud, and open sourced in 20<sup>th</sup>, October, 2017 at github:https://github.com/alibaba/AliOS-Things.
-
-## Architecture Overview
-
-From an architectural point of view, AliOS Things adapts Layered Architecture and Component Architecture. From bottom to top, AliOS Things includes:
-
-- BSP: Board Support Package mainly developed and maintained by SoC Vendor
-- HAL: Hardware Abstraction Layer, like WiFi, UART
-- Kernel: Rhino RTOS Kernel, Yloop, VFS, KV Storage included
-- Protocol Stack: LwIP TCPIP Stack, uMesh mesh networking stack included
-- Security: TLS, TFS(Trusted Framework Service), TEE(Trusted Exexcution Environment)
-- AOS API: AliOS Things exposed APIs for Application and Middleware
-- Middleware: Alibaba's value-added and commonly seen IoT components included
-- Examples: hands-on sample codes, and well tested applications such as Alinkapp
-
-All modules have been organized as Components, and each component has its own .mk file to describe its dependency with other Components, which enables applications to choose components needed easily.
-
-# Documentation
-
-AliOS Things' documentation are mainly hosted at [Github Wiki](https://github.com/alibaba/AliOS-Things/wiki).
-
-### How to contribute
-
-Please refer to [Contributing Guideline](https://github.com/alibaba/AliOS-Things/wiki/contributing).
-
-### Quick Start by Command Line using Ubuntu Machine
-
-```shell
-$ pip install aos-cube
-$ git clone https://github.com/alibaba/AliOS-Things.git
-$ cd AliOS-Things
-$ aos make helloworld@linuxhost
-$ ./out/helloworld@linuxhost/binary/helloworld@linuxhost.elf
-```
-
-### Quick Start by IDE(supporting Windows/MAC/Linux)
-
-Please refer to [AliOS Things Application Develop Guide](https://github.com/alibaba/AliOS-Things/wiki/AliOS-Things-APP-DEV-Guide).
-
-# Community
-
-  * [Technical Blog | 云栖社区](https://yq.aliyun.com/teams/184)
-  * [Technical Forum | 开发者论坛](https://bbs.aliyun.com/thread/410.html)
-  * [技术交流群(微信)](http://o7spigzvd.bkt.clouddn.com/qr_wechat_100+.jpeg) - 人数过多，请联系管理员手动拉入
-  * [技术交流群(钉钉)](http://o7spigzvd.bkt.clouddn.com/qr_dingtalk_github.png)
-
-# License
-
-  AliOS Things is released under the Apache 2.0 license.
-
-    Copyright 2015-2017 Alibaba Group Holding Ltd.
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at following link.
-    
-    http://www.apache.org/licenses/LICENSE-2.0
-    
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-
-------
 
 ## AliOS Things概述
 
@@ -106,4 +51,3 @@ AliOS Things 是 AliOS 家族旗下的、面向 IoT 领域的、轻量级物联�
 **解决IoT实际问题的特性演进**
 
 - 更好的云端一体融合优化，更简单的开发体验，更安全，更优整体性能和算法支持，更多的特性演进，我们在路上  
-  Stay Hungry，Stay Foolish！
