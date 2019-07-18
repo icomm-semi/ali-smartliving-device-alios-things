@@ -280,6 +280,12 @@ static int _network_ssl_read(TLSDataParams_t *pTlsData, char *buffer, int len, i
     gettimeofday(&tv1, NULL);
 #endif
 
+    if (len > 1) {  //  len == 1 indicates that trying to read packet length
+        timeout_ms = 20000;
+    } else if (timeout_ms < 30){
+        timeout_ms = 30;  // wait for at least 30ms for header type or packet length
+    }
+    
     mbedtls_ssl_conf_read_timeout(&(pTlsData->conf), timeout_ms);
     while (readLen < len) {
         ret = mbedtls_ssl_read(&(pTlsData->ssl), (unsigned char *)(buffer + readLen), (len - readLen));
@@ -288,7 +294,7 @@ static int _network_ssl_read(TLSDataParams_t *pTlsData, char *buffer, int len, i
             net_status = 0;
         } else if (ret == 0) {
             /* if ret is 0 and net_status is -2, indicate the connection is closed during last call */
-            return (net_status == -2) ? net_status : readLen;
+		return (net_status == -2) ? net_status : readLen;
         } else {
             if (MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY == ret) {
                 platform_err("ssl recv peer close notify");
@@ -300,7 +306,6 @@ static int _network_ssl_read(TLSDataParams_t *pTlsData, char *buffer, int len, i
                        || (MBEDTLS_ERR_SSL_NON_FATAL == ret)) {
                 /* read already complete */
                 /* if call mbedtls_ssl_read again, it will return 0 (means EOF) */
-
                 return readLen;
             } else {
 #ifdef CSP_LINUXHOST
