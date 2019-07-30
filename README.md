@@ -4,7 +4,7 @@
 
 版本号 | 发布日期 | 下载链接 | 
 :-: | :-: | :-: |
-1.0.0 | 20190715 | [下载](https://code.aliyun.com/living_platform/feiyan_sdk_for_alios/repository/archive.zip?ref=rel_1.0.0 "飞燕1.0.0版本") | 
+1.0.0 | 20190715 | [下载](https://code.aliyun.com/living_platform/ali-smartliving-device-alios-things/repository/archive.zip?ref=rel_1.0.0 "飞燕1.0.0版本") | 
 更新内容：  
 集成飞燕SDK 1.0.0版本
 
