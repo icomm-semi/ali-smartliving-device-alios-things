@@ -1,0 +1,13 @@
+diff --git a/security/imbedtls/include/mbedtls/ssl.h b/security/imbedtls/include/mbedtls/ssl.h
+index 7241922..00c0aef 100644
+--- a/security/imbedtls/include/mbedtls/ssl.h
++++ b/security/imbedtls/include/mbedtls/ssl.h
+@@ -286,7 +286,7 @@
+ #ifdef AOS_OTA_TLS
+ #define MBEDTLS_SSL_MAX_CONTENT_LEN (8 * 1024)
+ #else
+-#define MBEDTLS_SSL_MAX_CONTENT_LEN (4 * 1024)
++#define MBEDTLS_SSL_MAX_CONTENT_LEN (8 * 1024)
+ #endif
+ #endif
+ 

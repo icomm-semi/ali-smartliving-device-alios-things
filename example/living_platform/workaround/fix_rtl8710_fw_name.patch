@@ -1,0 +1,14 @@
+diff --git a/platform/mcu/rtl8710bn/script/manipulate_image.sh b/platform/mcu/rtl8710bn/script/manipulate_image.sh
+index 612aff6..40d1994 100644
+--- a/platform/mcu/rtl8710bn/script/manipulate_image.sh
++++ b/platform/mcu/rtl8710bn/script/manipulate_image.sh
+@@ -7,7 +7,8 @@ if [ ! -d "${platform_dir}/Debug/Exe" ]; then
+   mkdir -p ${platform_dir}/Debug/Exe
+ fi
+ BIN_DIR=${platform_dir}/Debug/Exe
+-outputname=$3@$4
++app_name=${3/\//.}
++outputname=$app_name@$4
+ outputdir=$2/out/${outputname}/binary
+ OS=`uname -s`
+ PICK=${platform_dir}/tools/pick
