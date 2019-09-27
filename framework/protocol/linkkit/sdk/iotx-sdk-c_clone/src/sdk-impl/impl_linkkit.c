@@ -451,6 +451,19 @@ static void _iotx_linkkit_event_callback(iotx_dm_event_types_t type, char *paylo
 
             memset(property_payload, 0, lite_item_payload.value_length + 1);
             memcpy(property_payload, lite_item_payload.value, lite_item_payload.value_length);
+            if ( strstr(property_payload,"awss.BindNotify") ) {
+                int len = 1;
+                char rst = 0;
+                HAL_Kv_Get(AWSS_KV_RST_FLAG, &rst, &len);
+                if (strstr(property_payload,"Unbind") && rst != 0) {
+		    IMPL_LINKKIT_FREE(property_payload);
+                    return;
+                }
+                if (rst != 0) {
+                    rst = 0;
+                    HAL_Kv_Set(AWSS_KV_RST_FLAG, &rst, sizeof(rst), 0);
+                }
+            }
             callback = iotx_event_callback(ITE_EVENT_NOTIFY);
             if (callback) {
                 ((int (*)(const int, const char *, const int))callback)(lite_item_devid.value_int, property_payload,

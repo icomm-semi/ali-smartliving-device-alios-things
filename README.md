@@ -1,12 +1,12 @@
 ## 版本发布说明
-飞燕SDK1.0.0 for AliOS Things  
-本次发布的是包含飞燕SDK 1.0.0版本的AliOS版本。
+飞燕SDK1.1.0 for AliOS Things  
+本次发布的是包含飞燕SDK 1.1.0版本的AliOS版本。
 
 版本号 | 发布日期 | 下载链接 | 
 :-: | :-: | :-: |
-1.0.0 | 20190715 | [下载](https://code.aliyun.com/living_platform/feiyan_sdk_for_alios/repository/archive.zip?ref=rel_1.0.0 "飞燕1.0.0版本") | 
+1.1.0-1 | 20190927 | [下载](https://code.aliyun.com/living_platform/ali-smartliving-device-alios-things/repository/archive.zip?ref=rel_1.1.0 "飞燕1.1.0版本") | 
 更新内容：  
-集成飞燕SDK 1.0.0版本
+集成飞燕SDK 1.1.0版本
 
 ## 文档链接
 [生活物联网平台(飞燕平台)官网](https://iot.aliyun.com/products/livinglink)  

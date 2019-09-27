@@ -9,6 +9,8 @@
 extern "C" {
 #endif
 
+#define AWSS_KV_RST_FLAG                "awss.rst.flag"
+
 /**
  * @brief   start wifi setup service
  *

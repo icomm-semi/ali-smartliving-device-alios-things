@@ -146,6 +146,8 @@ int awss_report_reset()
     awss_report_reset_suc = 0;
    
     HAL_Kv_Set(AWSS_KV_RST, &rst, sizeof(rst), 0);
+    /* guocheng.kgc add for filter unbind msg when device reset */
+    HAL_Kv_Set(AWSS_KV_RST_FLAG, &rst, sizeof(rst), 0);
     return awss_report_reset_to_cloud();
 }
 

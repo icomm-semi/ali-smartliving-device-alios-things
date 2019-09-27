@@ -1249,13 +1249,12 @@ int timer_service_init(const char **control_list, uint8_t num_control_list, \
 
     memset(&g_countdown, 0, sizeof(g_countdown));
 
-#ifdef ENABLE_COUNTDOWN_LIST
-    countdownlist_target_list = countdownlist_target;
     if (num_control_list > NUM_OF_CONTROL_TARGETS)
         g_num_control_list = NUM_OF_CONTROL_TARGETS;
     else
         g_num_control_list = num_control_list;
-
+#ifdef ENABLE_COUNTDOWN_LIST
+    countdownlist_target_list = countdownlist_target;
     if (num_countdownlist_target > NUM_OF_COUNTDOWN_LIST_TARGET)
         g_num_countdownlist_target = NUM_OF_COUNTDOWN_LIST_TARGET;
     else
