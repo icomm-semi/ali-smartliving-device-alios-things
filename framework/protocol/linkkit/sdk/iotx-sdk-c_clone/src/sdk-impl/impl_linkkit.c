@@ -1278,6 +1278,24 @@ int IOT_Linkkit_Connect(int devid)
     return res;
 }
 
+/* need remove this patch when bind/unbind msg from cloud is ready */
+static void clear_unbind_flag()
+{
+    static uint64_t time_start_ms = 0;
+    static int flag_del = 0;
+    if(flag_del == 1)
+	return;
+
+    if (time_start_ms == 0) {
+        time_start_ms = HAL_UptimeMs();
+    }
+
+    if (HAL_UptimeMs() - time_start_ms > 20000){
+        HAL_Kv_Del(AWSS_KV_RST_FLAG);
+	flag_del = 1;
+    }
+}
+
 void IOT_Linkkit_Yield(int timeout_ms)
 {
     iotx_linkkit_ctx_t *ctx = _iotx_linkkit_get_ctx();
@@ -1286,7 +1304,8 @@ void IOT_Linkkit_Yield(int timeout_ms)
         sdk_err("Invalid Parameter");
         return;
     }
-
+    
+    clear_unbind_flag();
     if (ctx->is_opened == 0 || ctx->is_connected == 0) {
         return;
     }

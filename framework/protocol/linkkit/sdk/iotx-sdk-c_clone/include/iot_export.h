@@ -35,7 +35,7 @@ extern "C" {
 #define PRODUCT_SECRET_LEN  (64)
 
 #define LINKKIT_VERSION     "2.3.0"
-#define LIVING_SDK_VERSION  "_fy=1.1.0-1"
+#define LIVING_SDK_VERSION  "_fy=1.1.0-2"
 #define MODULE_VENDOR_ID    (32)    /* Partner ID */
 
 #define HOST_ADDRESS_LEN    (128)
