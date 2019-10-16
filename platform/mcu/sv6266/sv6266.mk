@@ -14,7 +14,7 @@ HOST_OPENOCD := ICEman
 
 $(NAME)_TYPE := kernel
 
-$(NAME)_COMPONENTS += rhino hal netmgr framework.common cli cjson digest_algorithm alicrypto
+$(NAME)_COMPONENTS += rhino hal netmgr framework.common cjson digest_algorithm alicrypto
 $(NAME)_COMPONENTS += protocols.net
 $(NAME)_COMPONENTS += libc
 
@@ -64,6 +64,7 @@ GLOBAL_INCLUDES += $(SDKDIR)/components/osal
 GLOBAL_INCLUDES += $(SDKDIR)/components/inc
 GLOBAL_INCLUDES += $(SDKDIR)/components
 GLOBAL_INCLUDES += $(SDKDIR)/components/tools/atcmd
+GLOBAL_INCLUDES += $(SDKDIR)/components/drv/tmr
 GLOBAL_INCLUDES += $(SDKDIR)/components/inc/crypto \
                    $(SDKDIR)/components/softmac \
                    $(SDKDIR)/components/iotapi \
@@ -81,23 +82,31 @@ GLOBAL_INCLUDES += inc/custom
 XIP_MODE := 1
 ifeq ($(strip $(XIP_MODE)), 1)
 GLOBAL_DEFINES += XIP_MODE
+GLOBAL_ASMFLAGS += -DXIP_MODE
 endif
 
 ROM_MODE := 0
 ifeq ($(strip $(ROM_MODE)), 1)
 GLOBAL_DEFINES += ROM_MODE
+GLOBAL_ASMFLAGS += -DROM_MODE
 else
 GLOBAL_DEFINES += NO_ROM
+GLOBAL_ASMFLAGS += -DNO_ROM
 endif
 
 GLOBAL_DEFINES += ASICv2
+GLOBAL_ASMFLAGS += -DASICv2
 GLOBAL_DEFINES += CONFIG_CACHE_SUPPORT
+GLOBAL_ASMFLAGS += -DCONFIG_CACHE_SUPPORT
 GLOBAL_DEFINES += CONFIG_ENABLE_WDT
 GLOBAL_DEFINES += CONFIG_AOS_CLI_STACK_SIZE=4096
 
-SUPPORT_LOW_POWER := 0
+SUPPORT_LOW_POWER := 1
 ifeq ($(strip $(SUPPORT_LOW_POWER)), 1)
 GLOBAL_DEFINES += FEATURE_RETENTION_BOOT
+GLOBAL_ASMFLAGS += -DFEATURE_RETENTION_BOOT
+#GLOBAL_DEFINES += PWRMGMT_CONFIG_DEBUG
+GLOBAL_DEFINES += SUPPORT_LOW_POWER=1
 endif
 
 GLOBAL_DEFINES += SUPPORT_PARTITION_MP_TABLE
@@ -115,7 +124,7 @@ GLOBAL_DEFINES += CONFIG_OS_RHINO
 # 0x00: reserved
 
 # 0x04: xtal
-XTAL := 26
+XTAL := 40
 GLOBAL_DEFINES += XTAL=$(XTAL)
 
 # 0x08: bus clock
@@ -182,17 +191,18 @@ GLOBAL_LDFLAGS += platform/mcu/sv6266/do_printf.o
 
 $(NAME)_INCLUDES := $(SDKDIR)/components/drv
 $(NAME)_SOURCES :=	aos.c \
-					libc_patch.c \
-					port/soc_impl.c \
-					port/port_tick.c \
-					hal/uart.c \
-					hal/flash_port.c \
-                    hal/wifi_port.c \
-                    hal/rf_cmd.c \
-                    hal/pwm.c \
-                    hal/adc.c \
-		    hal/gpio.c \
-		    hal/i2c.c  \
-		    hal/spi.c  \
-                    $(SDKDIR)/components/net/tcpip/lwip-1.4.0/src/netif/ethernetif.c \
-					hal/hw.c
+	libc_patch.c \
+	port/soc_impl.c \
+	port/port_tick.c \
+	port/ota_soc_init.c \
+	hal/uart.c \
+	hal/flash_port.c \
+	hal/wifi_port.c \
+	hal/rf_cmd.c \
+	hal/pwm.c \
+	hal/adc.c \
+	hal/gpio.c \
+	hal/i2c.c  \
+	hal/spi.c  \
+	$(SDKDIR)/components/net/tcpip/lwip-1.4.0/src/netif/ethernetif.c \
+	hal/hw.c

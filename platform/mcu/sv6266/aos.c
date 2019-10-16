@@ -37,11 +37,15 @@
 
 ktask_t *g_radio_init;
 void uart_rx_isr(void);
+extern int write_reg_rf_table_ex(struct st_rf_table * p_table);
+extern struct st_rf_table ssv_rf_table;
+
 static void ssvradio_init_task(void *pdata)
 {
     PBUF_Init();
     NETSTACK_RADIO.init();    
     drv_sec_init();
+	write_reg_rf_table_ex(&ssv_rf_table);
     netstack_init(NULL);
     OS_TaskDelete(NULL);
 }
@@ -118,7 +122,7 @@ void isr_gpio_11()
 //    REG32(0xc0000c00) = '\n';
 }
 
-extern struct st_rf_table ssv_rf_table;
+
 
 static void app_start(void)
 {

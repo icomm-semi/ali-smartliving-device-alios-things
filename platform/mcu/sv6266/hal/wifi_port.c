@@ -10,6 +10,7 @@
 #include <aos/network.h>
 //#include "common.h"
 #include "wifi_api.h"
+#include "softap_func.h"
 
 
 #if defined(PORTING_DEBUG)
@@ -526,6 +527,62 @@ void stop_debug_mode(hal_wifi_module_t *m)
 {
 }
 
+static int  start_ap_mode(hal_wifi_module_t *m, const char *ssid, const char *passwd, int interval, int hide)
+{
+	int ret;
+	hal_wifi_ip_stat_t ipstat;
+	
+    SOFTAP_CUSTOM_CONFIG isoftap_custom_config;
+	memset(&isoftap_custom_config,0,sizeof(isoftap_custom_config));
+	DUT_wifi_start(DUT_NONE);
+	OS_MsDelay(100);
+    
+
+    isoftap_custom_config.start_ip = 0xc0a80002;    //192.168.0.2    
+    isoftap_custom_config.end_ip = 0xc0a80005;  //192.168.0.5    
+    isoftap_custom_config.gw = 0xc0a80001;      //192.168.0.1    
+    isoftap_custom_config.subnet = 0xffffff00;  //255.255.255.0
+
+	
+	isoftap_custom_config.max_sta_num = 4;     
+	isoftap_custom_config.beacon_interval = interval; 
+
+	if(strlen(passwd) >= 8)
+	{
+		isoftap_custom_config.encryt_mode = 2;
+		isoftap_custom_config.keylen = strlen(passwd);    
+		memcpy(&isoftap_custom_config.key[0],passwd,isoftap_custom_config.keylen);
+	}
+	else
+	{
+		isoftap_custom_config.encryt_mode = 0;
+//		isoftap_custom_config.keylen = 0; 
+		isoftap_custom_config.keylen = strlen("12345678");    
+		memcpy(&isoftap_custom_config.key[0],"12345678",isoftap_custom_config.keylen);
+	}
+	isoftap_custom_config.channel= 1;
+	
+	isoftap_custom_config.ssid_length = strlen(ssid);
+	memcpy(&isoftap_custom_config.ssid[0],ssid,isoftap_custom_config.ssid_length);
+
+	ret = softap_set_custom_conf(&isoftap_custom_config); 
+
+	DUT_wifi_start(DUT_AP);
+	netif_set_default(netif_find(IF1_NAME));
+
+	return 0;
+
+}
+static int  stop_ap_mode(hal_wifi_module_t *m)
+{
+	LOG_AOS_HAL("stop_ap_mode\n");
+	DUT_wifi_start(DUT_NONE);
+	netif_set_default(netif_find(IF0_NAME));
+
+	return 0;
+
+}
+
 
 hal_wifi_module_t sim_aos_wifi_icomm = {
     .base.name           = "sim_aos_wifi_icomm",
@@ -548,6 +605,8 @@ hal_wifi_module_t sim_aos_wifi_icomm = {
     .register_monitor_cb =  register_monitor_cb,
     .register_wlan_mgnt_monitor_cb = register_wlan_mgnt_monitor_cb,
     .wlan_send_80211_raw_frame = wlan_send_80211_raw_frame,
+    .start_ap			=	start_ap_mode,
+    .stop_ap			=	stop_ap_mode,
     .start_debug_mode = start_debug_mode,
     .stop_debug_mode = stop_debug_mode
 };
