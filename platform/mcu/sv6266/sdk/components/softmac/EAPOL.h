@@ -65,7 +65,7 @@ struct ieee80211_eapol_request {
 
 //struct wpa_common_ctx;
 //void tx_eapol_start_req ();
-int rx_process_wpa (u8 id, struct eapol_frame *eap_frame);
-int rx_process_eapol (u8 id, u8 *data, int datalen);
+int rx_process_wpa (u8 id, u8 wsid, struct eapol_frame *eap_frame);
+int rx_process_eapol (u8 id, u8 wsid, u8 *data, int datalen);
 
 #endif

@@ -10,7 +10,9 @@ LIB_SRC += sta_func.c
 LIB_SRC += softap_func.c
 LIB_SRC += rate_control.c
 LIB_SRC += powersave.c
-LIB_SRC += country_cfg.c
+LIB_SRC += powersave_main.c
+#LIB_SRC += country_cfg.c
+PROJECT_SRC += components/softmac/country_cfg.c
 
 LIB_ASRC :=
 LIBRARY_NAME := ssvradio

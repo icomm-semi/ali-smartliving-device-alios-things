@@ -1,11 +1,20 @@
 #ifndef POWERSAVE_H_
 #define POWERSAVE_H_
+#include <attrs.h>
 
-typedef enum t_PC_MODE
+typedef enum {
+    NULL_SUCC_ACTIVE    = 0x0,
+    NULL_SUCC_POWERSAVE,
+    NULL_FAIL,
+}NULL_TXRSP;
+
+struct dtim_data
 {
-    MORMAL_MODE = 0,
-    IRQ_MODE,
-} PC_MODE;
+    s32 rsdiff;
+    u8 dtim_cnt;
+    u8 dtim_peroid;
+    u8 keepdata;
+};
 
 typedef enum t_MCU_CFG
 {
@@ -17,71 +26,41 @@ typedef enum t_RFPHY_STA
 {
     RFPHY_ON = 0,
     RFPHY_OFF,
-    RFPHY_SETTING,
 } RFPHY_STA;
 
-typedef struct t_PS_TIMER{
-    u8  en;
-    u32 tclock;
-}PS_TIMER;
-
-typedef struct PWSAVE_NEXTE{
-    u32 nextsleeptime;
-    u32 nexteventtime;
-    u32 nexteventtime_en:8;
-    u32 nextevent:8;
-    u32 reserved:16;
-}PWSAVE_NEXTE;
-
-typedef enum t_POWERSAVE_MSG
+typedef struct POWERSAVE_STA_INFO
 {
-    GO_TO_ACTIVE = 0,
-	DATA_ACTIVE_SUCC,
-    DATA_PWSAVE_SUCC,
-    DATA_FAULT,
-    TURNON_RFPHY,
-    TURNOFF_RFPHY,
-    UPDATE_TIMEOUT,
-    TEMP_ALIVE,
-} POWERSAVE_MSG;
+    void (*txnullfn)(u8);
+    void (*backupmacsettings)(void);
+    void (*restoremacsettings)(void);
+    void (*txexcpt)(void);
+    void (*on3offexfn)(void);
+    u8 associd;
+    u8 ch;
+    u8 ht40bw;
+} POWERSAVE_STA_INFO;
 
-typedef enum t_TIMEOUT_EVENT
+typedef enum t_POWER_MODE
 {
-    WAIT_BEACON_TIMEOUT,
-    SYS_AWAKE_TIMEOUT,
-    SYS_EN_POWERSAVE_TIMEOUT,
-    NOEVENT_TIMEOUT,
-} TIMEOUT_EVENT;
+	PSACTIVE_MODE = 0,
+	PSSAVING_MODE,
+    TEMP_ACTIVE, //There is data to send or receive, go to active mode temporarily.
+    TRANS_TO_PS, //Means there is a packet send to AP with the power management bit is power save mode.
+    TRANS_TO_AC, //Means there is a packet send to AP with the power management bit is active mode.
+} POWER_MODE;
 
-typedef struct t_PS_runinfo
-{
-    u16   losscnt:3;
-    u16   dataretx:5;
-    u16   sleepcountdown:3;
-    u16   wakeupsource:2;
-    u16   rfoff:2;
-    u16   beaconillegal:1;
-} PS_runinfo;
-
-typedef struct t_PS_STATUS
-{
-    u32 usdtimperiod;
-    u32 basebeacontime;
-    u32 wakeuptime;
-    PWSAVE_NEXTE next;
-    struct t_PS_runinfo psruninfo;
-    u8 userexpstatus;
-    u8 STApwstatus;
-    u8 opmode;
-}PS_STATUS;
-
+void pwsave_init();
+void pwsave_conf(POWERSAVE_STA_INFO *stainfo);
 void checkpwstate();
-void findTIM(u8 *buf, u8 *end, u32 intime);
-void pwsave_enque(int msg);
-void pwupdatepstime();
-void resetpwstatus(u8 clearpstime);
-s32 Switch_Power_mode(u8 enable, MCU_CFG opmode);
-void powersaving_mgmt_task( void *args );
+void pwsave_null_report(NULL_TXRSP response);
+u8 beacon_handler(u8 *pkt, u16 len, u32 intime);
+u8 pwsave_set_radiotask_state(u8 state);
+void pwsave_do_keepalive();
+s8 activate_powersave(POWERSAVE_STA_INFO *stainfo);
+s8 deactivate_powersave(u8 wificonn);
+s32 switch_Power_mode(u8 enable, MCU_CFG opmode);
+void on3_shutdown(u8 isprotect);
+void on3_activate(u8 isprotect);
 
 #endif /* POWERSAVE_H_ */
 

@@ -1,5 +1,15 @@
 #define M_FLASH_START_ADDR          (0x30000000)
-#define M_FLASH_INIT_ADDR           (M_FLASH_START_ADDR+0x00008000)
+#define M_FLASH_BOOTLOADER_SIZE     (0x4000)
+#define M_FLASH_SA_TBL_SIZE         (0x1000)
+#define M_FLASH_MAC_TBL_SIZE        (0x1000)
+#define M_FLASH_RAW_SIZE            (SETTING_PARTITION_USER_RAW_SIZE)
+#define M_FLASH_INIT_ADDR           \
+    (M_FLASH_START_ADDR \
+     + M_FLASH_BOOTLOADER_SIZE \
+     + M_FLASH_SA_TBL_SIZE \
+     + M_FLASH_MAC_TBL_SIZE \
+     + M_FLASH_RAW_SIZE \
+    )
 
 #include <stdint.h>
 #include "hal_gpio.h"

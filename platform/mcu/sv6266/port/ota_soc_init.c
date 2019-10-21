@@ -2,7 +2,7 @@
 #include "soc_types.h"
 #include "soc_defs.h"
 
-#include "ota_hal_gpio.h"
+#include "hal_gpio.h"
 #include "ota_hal_pinmux.h"
 #include "custom_io_hal.h"
 #include "custom_io_chk.h"

@@ -258,6 +258,7 @@ enum ieee80211_back_parties {
 #define IS_SUBTYPE_DATA(fc)   IS_EQUAL(FC_STYPE(fc), FST_DATA)
 #define IS_SUBTYPE_OOSDATA(fc)   IS_EQUAL(FC_STYPE(fc), FST_QOS_DATA)
 
+#define IS_BROADCAST(addr)       ((addr[0] & 0x1) == 0x1) 
 
 #define IS_ASSOC_REQ(fc)      IS_EQUAL(FC_TYPE(fc), (FT_MGMT|FST_ASSOC_REQ))
 #define IS_ASSOC_RESP(fc)     IS_EQUAL(FC_TYPE(fc), (FT_MGMT|FST_ASSOC_RESP))

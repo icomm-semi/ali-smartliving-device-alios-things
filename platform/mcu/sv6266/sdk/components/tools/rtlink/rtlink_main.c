@@ -89,9 +89,10 @@ static void RTGetResult(
 }
 
 static void RTSwitchChCallback(
-    u8 ch)
+    u8 ch, u8 type)
 {
-    set_channel((u8) ch);
+    //set_channel((u8) ch);
+    wifi_set_channel((u32)ch,(u32)type);
 }
 
 static void RTChangeHandler(

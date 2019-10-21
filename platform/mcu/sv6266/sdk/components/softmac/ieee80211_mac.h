@@ -50,7 +50,7 @@
 #include "attrs.h"
 extern const struct mac_driver ieee80211_mac;
 
-void rx_process_data (u8 id) ATTRIBUTE_SECTION_FAST;
+void rx_process_data (u8 id, u8 wsid) ATTRIBUTE_SECTION_FAST;
 int is_protectframe(u16 fc) ;
 int is_data(u16 fc) ;
 int is_mgmt(u16 fc) ;

@@ -1,6 +1,6 @@
 
 LIB_SRC := hal_tm.c
-LIB_SRC += drv_tmr.c
+LIB_SRC += drv_tmr.c drv_tim_timer.c
 
 LIB_ASRC :=
 LIBRARY_NAME := tmr

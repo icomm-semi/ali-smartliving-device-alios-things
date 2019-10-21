@@ -22,6 +22,7 @@ SUPPORT_PARTITION_USER_RAW    		:= 1
 SETTING_THROUGHPUT_HIGH			    := 1
 SETTING_UART_FW_UPGRADE 			:= 1
 
+SETTING_LOCK_CHIP_ID				?= 1
 ################################################################
 # Project header
 ################################################################
@@ -75,6 +76,9 @@ GLOBAL_DEF		+= -DSETTING_PSRAM_HEAP_BASE=$(SETTING_PSRAM_HEAP_BASE)
 # 0x1c: psram heap size
 SETTING_PSRAM_HEAP_SIZE				:= 0
 GLOBAL_DEF		+= -DSETTING_PSRAM_HEAP_SIZE=$(SETTING_PSRAM_HEAP_SIZE)
+
+# 0x24: RAW size
+SETTING_PARTITION_USER_RAW_SIZE     := "(8*1024)"
 
 SUPPORT_SRM_TASK_LOG				?= 0
 
@@ -522,6 +526,7 @@ INCLUDE += -I$(SDKDIR)/components/inc/crypto
 INCLUDE += -I$(SDKDIR)/components/softmac
 INCLUDE += -I$(SDKDIR)/components/iotapi
 INCLUDE += -I$(SDKDIR)/components/netstack_wrapper
+INCLUDE += -I$(SDKDIR)/components/bsp/soc/lowpower
 #INCLUDE += -I$(SDKDIR)/components/third_party/cJSON
 
 ifeq ($(strip $(WAC_EN)), 1)
@@ -598,6 +603,8 @@ LDFLAGS     += --specs=nosys.specs -Werror -mcmodel=large -g
 
 CFLAGS 		+= -DSETTING_UART_FW_UPGRADE=$(SETTING_UART_FW_UPGRADE)
 AFLAGS 		+= -DSETTING_UART_FW_UPGRADE=$(SETTING_UART_FW_UPGRADE)
+
+CFLAGS      += -DSUPPORT_LOW_POWER=1
 
 VERBOSE  ?= 0
 

@@ -24,7 +24,6 @@ SSV_FS		FS_init(void);
 SSV_FS		FS_reset(void);
 void		FS_list(SSV_FS fs);
 void		FS_remove_prevota(SSV_FS fs);
-int32_t		FS_create(SSV_FS fs, const char* path, uint32_t mode);
 SSV_FILE	FS_open(SSV_FS fs, const char* path, uint32_t flags, uint32_t mode);
 int32_t 	FS_read(SSV_FS fs, SSV_FILE file, void* buf, uint32_t len);
 int32_t 	FS_write(SSV_FS fs, SSV_FILE file, void* buf, uint32_t len);

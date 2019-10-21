@@ -73,6 +73,9 @@ GLOBAL_DEF		+= -DSETTING_PSRAM_HEAP_BASE=$(SETTING_PSRAM_HEAP_BASE)
 SETTING_PSRAM_HEAP_SIZE				:= 0
 GLOBAL_DEF		+= -DSETTING_PSRAM_HEAP_SIZE=$(SETTING_PSRAM_HEAP_SIZE)
 
+# 0x24: RAW size
+SETTING_PARTITION_USER_RAW_SIZE     := "(8*1024)"
+
 ################################################################
 # Build System Detail setting
 ################################################################

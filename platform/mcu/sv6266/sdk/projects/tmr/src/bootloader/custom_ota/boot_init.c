@@ -4,6 +4,7 @@
 
 #include "ota_flash.h"
 #include "tiny_printf.h"
+#include "serial.h"
 
 // this function will execute before boot system start.
 void _boot_init() {
@@ -23,7 +24,8 @@ void _boot_init() {
     sel_func |= (0x1 << SEL_UART0_I);	//enable uart0 as gpio21 and gpio22
 #endif    
 
-    hal_pinmux_set_raw(pin_mode, sel_func);	
+    hal_pinmux_set_raw(pin_mode, sel_func);
+    serial_init(115200);
 }
 
 // define ota by filesystem.

@@ -379,7 +379,7 @@ struct eapol_key_pkt
 } __attribute__ (( packed ));
 
 void init_wpa_ctx(struct wpa_common_ctx *ctx, u8 *pmk);
-void init_AP_wpa_ctx(struct wpa_common_ctx *ctx, u8 *pmk, u8 *addr);
+void init_AP_wpa_ctx(struct wpa_common_ctx *ctx, u8 *pmk, u8 *addr,struct ieee80211_ie_rsn *rsn_ie);
 int pack_wpa2 (struct wpa_common_ctx *ctx, u8 *ptr);
 int sec80211_detect(struct wpa_common_ctx *ctx, u8 *buf, u16 buf_len, u8 crypto);
 void sec80211_detect_for_autoScan(u8 *buf, u16 buf_len, u8 *auth, u8 *crypt);

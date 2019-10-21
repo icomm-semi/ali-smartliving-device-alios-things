@@ -146,7 +146,6 @@ ifeq ($(strip $(FLASH_MODE)), 1)
 ifeq ($(filter FPGAv2 ASIC ASICv2,$(TARGET_DEF)), $(TARGET_DEF))
 $(IMAGE_DIR)/$(PROJECT).bin: $(IMAGE_DIR)/$(PROJECT)$(ELFSUFFIX)
 	$(Q)$(OBJCOPY) -O binary $< $@
-	md5sum $@ | awk '{print $$1}' > $(IMAGE_DIR)/$(PROJECT).md5
 ifeq ($(strip $(SUPPORT_BOOTLOADER)), 1)
 	@if [ ! -f "$(IMAGE_DIR)/bootloader.bin" ]; then \
 		make bootloader; \
@@ -163,6 +162,7 @@ ifeq ($(strip $(SUPPORT_BOOTLOADER)), 1)
 		make bootloader_clean; \
 	fi
 endif
+	md5sum $@ | awk '{print $$1}' > $(IMAGE_DIR)/$(PROJECT).md5
 else
 $(IMAGE_DIR)/$(PROJECT).bin: $(IMAGE_DIR)/$(PROJECT)$(ELFSUFFIX) utils/flash_header
 	$(OBJCOPY) -O binary $< $@.tmp

@@ -141,6 +141,22 @@
 #define SPIFFS_OBJ_ID_DELETED           ((spiffs_obj_id)0)
 #define SPIFFS_OBJ_ID_FREE              ((spiffs_obj_id)-1)
 
+
+
+#if defined(__GNUC__) || defined(__clang__) || defined(__TI_COMPILER_VERSION__)
+    /* For GCC, clang and TI compilers */
+#define SPIFFS_PACKED __attribute__((packed))
+#elif defined(__ICCARM__) || defined(__CC_ARM)
+    /* For IAR ARM and Keil MDK-ARM compilers */
+#define SPIFFS_PACKED 
+
+#else
+    /* Unknown compiler */
+#define SPIFFS_PACKED 
+#endif
+
+
+
 #if SPIFFS_USE_MAGIC
 #if !SPIFFS_USE_MAGIC_LENGTH
 #define SPIFFS_MAGIC(fs, bix)           \
@@ -455,7 +471,7 @@ typedef struct {
 // page header, part of each page except object lookup pages
 // NB: this is always aligned when the data page is an object index,
 // as in this case struct spiffs_page_object_ix is used
-typedef struct __attribute(( packed )) {
+typedef struct SPIFFS_PACKED {
   // object id
   spiffs_obj_id obj_id;
   // object span index
@@ -465,7 +481,7 @@ typedef struct __attribute(( packed )) {
 } spiffs_page_header;
 
 // object index header page header
-typedef struct __attribute(( packed ))
+typedef struct SPIFFS_PACKED
 #if SPIFFS_ALIGNED_OBJECT_INDEX_TABLES
                 __attribute(( aligned(sizeof(spiffs_page_ix)) ))
 #endif
@@ -480,10 +496,14 @@ typedef struct __attribute(( packed ))
   spiffs_obj_type type;
   // name of object
   u8_t name[SPIFFS_OBJ_NAME_LEN];
+#if SPIFFS_OBJ_META_LEN
+  // metadata. not interpreted by SPIFFS in any way.
+  u8_t meta[SPIFFS_OBJ_META_LEN];
+#endif
 } spiffs_page_object_ix_header;
 
 // object index page header
-typedef struct __attribute(( packed )) {
+typedef struct SPIFFS_PACKED {
  spiffs_page_header p_hdr;
  u8_t _align[4 - ((sizeof(spiffs_page_header)&3)==0 ? 4 : (sizeof(spiffs_page_header)&3))];
 } spiffs_page_object_ix;
@@ -634,7 +654,8 @@ s32_t spiffs_page_delete(
 s32_t spiffs_object_create(
     spiffs *fs,
     spiffs_obj_id obj_id,
-    const u8_t name[SPIFFS_OBJ_NAME_LEN],
+    const u8_t name[],
+    const u8_t meta[],
     spiffs_obj_type type,
     spiffs_page_ix *objix_hdr_pix);
 
@@ -644,7 +665,8 @@ s32_t spiffs_object_update_index_hdr(
     spiffs_obj_id obj_id,
     spiffs_page_ix objix_hdr_pix,
     u8_t *new_objix_hdr_data,
-    const u8_t name[SPIFFS_OBJ_NAME_LEN],
+    const u8_t name[],
+    const u8_t meta[],
     u32_t size,
     spiffs_page_ix *new_pix);
 

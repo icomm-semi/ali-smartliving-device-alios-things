@@ -137,4 +137,35 @@ int8_t drv_gpio_register_isr(gpio_pin_t pin, isr_func handler);
  */
 int8_t drv_gpio_intc_clear(gpio_pin_t pin);
 
+/**
+ * @brief   Enable GPIO wake up pmu.
+ *
+ * @param   pin                             GPIO pin number.
+ *
+ * @return  -1                              The operation error.
+ * @return   0                              The operation completed successfully.         
+ */
+int8_t drv_gpio_set_wakeup_enable(gpio_pin_t pin);
+
+/**
+ * @brief   Disable GPIO wake up pmu.
+ *
+ * @param   pin                             GPIO pin number.
+ *
+ * @return  -1                              The operation error.
+ * @return   0                              The operation completed successfully.         
+ */
+int8_t drv_gpio_set_wakeup_disable(gpio_pin_t pin);
+
+/**
+ * @brief   Set the interrupt trigger mode.
+ *
+ * @param   int_mode                        Interrupt mode.
+ *
+ * @return  -1                              The operation error.
+ * @return   0                              The operation completed successfully.         
+ */
+int8_t drv_gpio_set_wakeup_detect(gpio_intc_trigger_mode_t int_mode);
+
+
 #endif  // __DRV_GPIO_H__

@@ -5,6 +5,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "rf/rf_api.h"
+
 #define CFG_ASSERT(cmp) \
     do { \
     } while(!(cmp))
@@ -18,7 +20,12 @@ const struct sa_cfg g_sa_cfg __attribute__((section(".sa_mp_data"))) = {
 			   0x0D,0x0B,0x09,0x07,
 			   0x0D,0x0B,0x09,0x07,
 			   0x0D,0x0B,0x09,0x07,
-			   0x23,0x5A
+			   0x23,0x5A,
+			   0xFF,0xFF,
+			   0x0D,0x0D,0x0A,0x08,0x4A,0x92,0x64,0x92,0xCC,0xB6,0xDB,0x96,
+			   0x0D,0x0D,0x0A,0x08,0x4A,0x92,0x64,0x92,0xCC,0xB6,0xDB,0x96,
+			   0x0D,0x0D,0x0A,0x08,0x4A,0x92,0x64,0x92,0xCC,0xB6,0xDB,0x96,
+			   0x1E,0x14,0x7C,0x15,0x44,0x16
 }
 };
 
@@ -77,3 +84,28 @@ void cfg_sa_write_cfg(struct sa_cfg *new_cfg, uint16_t len) {
     OS_MemFree(buf);
 }
 
+struct st_rf_table ssv_rf_table;
+    
+int load_rf_table_from_flash()
+{
+    volatile uint8_t *ptr = (volatile uint8_t *)&g_sa_cfg;
+
+    memcpy((uint8_t*)&ssv_rf_table, (uint8_t*)ptr, sizeof(ssv_rf_table));
+    return 0;    
+}
+
+int save_rf_table_to_flash()
+{
+    uint8_t *ptr = (uint8_t *)OS_MemAlloc(sizeof(g_sa_cfg));
+    if (ptr == NULL) 
+    {
+        printf("[%s] no memory, please check\n", __func__);
+        return -1;
+    }
+    memset(ptr, 0, sizeof(g_sa_cfg));
+    memcpy(ptr, &ssv_rf_table, sizeof(ssv_rf_table));
+
+    cfg_sa_write_cfg((struct sa_cfg*)ptr, sizeof(g_sa_cfg));
+    OS_MemFree(ptr);
+    return 0;
+}

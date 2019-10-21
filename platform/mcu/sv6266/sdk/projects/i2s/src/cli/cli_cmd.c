@@ -4,13 +4,14 @@
 #include "cli.h"
 //#include "single_tone_wave.h"
 //#include "cli_cmd.h"
-#include "drv/i2s/drv_i2s.h"
-#include "drv/i2s/hal_i2s.h"
-#include "drv/spimst/drv_spimst.h"
-#include "drv/dmac/drv_dmac.h"
+#include "i2s/drv_i2s.h"
+#include "i2s/hal_i2s.h"
+#include "spimst/drv_spimst.h"
+#include "dmac/drv_dmac.h"
 #include "sys/intc.h"
 #include "osal.h"
 #include "raw_pcm.h"
+#include "gpio/hal_gpio.h"
 
 uint8_t rx_buff[1024];
 uint8_t tx_buff[1024];
@@ -44,17 +45,17 @@ void i2s_codec_set_by_spi(i2s_mode_t Mode, sample_rate_t sample_rate, bit_resolu
     cpol = 0;
     data_length = 2;
 
-    ret = drv_spi_mst_init(clk_MHz, cpha, cpol);
+    ret = drv_spimst_init(clk_MHz, cpha, cpol);
 
     //RESET	
     write_buf[0] = 0x1e;
     write_buf[1] = 0x00;
-    ret = drv_spi_mst_dma_trx(write_buf, read_buf, data_length);
+    ret = drv_spimst_dma_trx(write_buf, read_buf, data_length, SPI_M_CS);
     
     //Power Down
     write_buf[0] = 0x0c;
     write_buf[1] = 0x00;
-    ret = drv_spi_mst_dma_trx(write_buf, read_buf, data_length);
+    ret = drv_spimst_dma_trx(write_buf, read_buf, data_length, SPI_M_CS);
 
     //Interface Format
     if(mode_master == Mode) {
@@ -91,7 +92,7 @@ void i2s_codec_set_by_spi(i2s_mode_t Mode, sample_rate_t sample_rate, bit_resolu
             write_buf[1] = 0x4e;
         }
 	}
-    ret = drv_spi_mst_dma_trx(write_buf, read_buf, data_length);
+    ret = drv_spimst_dma_trx(write_buf, read_buf, data_length, SPI_M_CS);
 
     //Sample Rate Ctl
     if(mode_master == Mode) {
@@ -109,42 +110,42 @@ void i2s_codec_set_by_spi(i2s_mode_t Mode, sample_rate_t sample_rate, bit_resolu
             write_buf[1] = 0x3e;
         }
 	}
-    ret = drv_spi_mst_dma_trx(write_buf, read_buf, data_length);
+    ret = drv_spimst_dma_trx(write_buf, read_buf, data_length, SPI_M_CS);
     
     //left ch headphone vol
     write_buf[0] = 0x04;
     write_buf[1] = 0xff;
-    ret = drv_spi_mst_dma_trx(write_buf, read_buf, data_length);
+    ret = drv_spimst_dma_trx(write_buf, read_buf, data_length, SPI_M_CS);
     
     //right ch headphone vol
     write_buf[0] = 0x06;
     write_buf[1] = 0xff;
-    ret = drv_spi_mst_dma_trx(write_buf, read_buf, data_length);
+    ret = drv_spimst_dma_trx(write_buf, read_buf, data_length, SPI_M_CS);
     
     //left input ch vol ctl
     write_buf[0] = 0x00;
     write_buf[1] = 0x1f;
-    ret = drv_spi_mst_dma_trx(write_buf, read_buf, data_length);
+    ret = drv_spimst_dma_trx(write_buf, read_buf, data_length, SPI_M_CS);
     
     //right input ch vol ctl
     write_buf[0] = 0x02;
     write_buf[1] = 0x1f;
-    ret = drv_spi_mst_dma_trx(write_buf, read_buf, data_length);
+    ret = drv_spimst_dma_trx(write_buf, read_buf, data_length, SPI_M_CS);
     
     //digital audio path ctl
     write_buf[0] = 0x0a;
     write_buf[1] = 0x06;
-    ret = drv_spi_mst_dma_trx(write_buf, read_buf, data_length);
+    ret = drv_spimst_dma_trx(write_buf, read_buf, data_length, SPI_M_CS);
     
     //analog audio path ctl
     write_buf[0] = 0x08;
     write_buf[1] = 0x10;
-    ret = drv_spi_mst_dma_trx(write_buf, read_buf, data_length);
+    ret = drv_spimst_dma_trx(write_buf, read_buf, data_length, SPI_M_CS);
     
     //Interface Activation
     write_buf[0] = 0x12;
     write_buf[1] = 0x01;
-    ret = drv_spi_mst_dma_trx(write_buf, read_buf, data_length);
+    ret = drv_spimst_dma_trx(write_buf, read_buf, data_length, SPI_M_CS);
     
 }
 
@@ -225,7 +226,7 @@ void Cmd_i2s_loopback_start(s32 argc, char *argv[]) {
     
     if (!OS_TaskCreate(i2s_loopback_task, "i2s_loopback", 512, NULL, 3, &i2s_loopback_handler)) {
         printf("[%s] create i2s_loopback_test failed.\n", __func__);
-        return -1;
+        return;
     }
     
     OS_EventSet(g_i2s_loopback_event);
@@ -297,7 +298,7 @@ void Cmd_i2s_pcm_start(s32 argc, char *argv[]) {
     
     if (!OS_TaskCreate(i2s_pcm_task, "i2s_pcm", 512, NULL, 1, &i2s_pcm_handler)) {
         printf("[%s] create i2s_loopback_test failed.\n", __func__);
-        return -1;
+        return;
     }
 
     OS_EventSet(g_i2s_pcm_event);

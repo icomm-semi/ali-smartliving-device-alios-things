@@ -62,6 +62,7 @@ GLOBAL_INCLUDES += $(SDKDIR)/components/bsp/soc/ssv6006/ASICv2
 GLOBAL_INCLUDES += $(SDKDIR)/components/bsp/soc/ssv6006
 GLOBAL_INCLUDES += $(SDKDIR)/components/osal
 GLOBAL_INCLUDES += $(SDKDIR)/components/inc
+GLOBAL_INCLUDES += $(SDKDIR)/components/drv/gpio
 GLOBAL_INCLUDES += $(SDKDIR)/components
 GLOBAL_INCLUDES += $(SDKDIR)/components/tools/atcmd
 GLOBAL_INCLUDES += $(SDKDIR)/components/drv/tmr
@@ -114,6 +115,10 @@ GLOBAL_DEFINES += SUPPORT_PARTITION_CFG_TABLE
 GLOBAL_DEFINES += SUPPORT_PARTITION_USER_RAW
 
 SETTING_THROUGHPUT_HIGH := 0
+SETTING_UART_FW_UPGRADE := 1
+GLOBAL_DEFINES += SETTING_UART_FW_UPGRADE=$(SETTING_UART_FW_UPGRADE)
+GLOBAL_ASMFLAGS += -DSETTING_UART_FW_UPGRADE=$(SETTING_UART_FW_UPGRADE)
+
 ifeq ($(strip $(SETTING_THROUGHPUT_HIGH)), 1)
 GLOBAL_DEFINES += SETTING_THROUGHPUT_HIGH
 endif
@@ -143,10 +148,12 @@ GLOBAL_DEFINES += XIP_BIT=$(XIP_BIT)
 # 0x10: partition main size
 SETTING_PARTITION_MAIN_SIZE := 820K
 GLOBAL_DEFINES += SETTING_PARTITION_MAIN_SIZE=$(SETTING_PARTITION_MAIN_SIZE)
+GLOBAL_ASMFLAGS += -DSETTING_PARTITION_MAIN_SIZE=$(SETTING_PARTITION_MAIN_SIZE)
 
 # 0x14: flash total size
 SETTING_FLASH_TOTAL_SIZE := 2M
 GLOBAL_DEFINES += SETTING_FLASH_TOTAL_SIZE=$(SETTING_FLASH_TOTAL_SIZE)
+GLOBAL_ASMFLAGS += -DSETTING_FLASH_TOTAL_SIZE=$(SETTING_FLASH_TOTAL_SIZE)
 
 # 0x18: psram heap base, not supported
 SETTING_PSRAM_HEAP_BASE := 0
@@ -156,6 +163,9 @@ GLOBAL_DEFINES += SETTING_PSRAM_HEAP_BASE=$(SETTING_PSRAM_HEAP_BASE)
 SETTING_PSRAM_HEAP_SIZE := 0
 GLOBAL_DEFINES += SETTING_PSRAM_HEAP_SIZE=$(SETTING_PSRAM_HEAP_SIZE)
 
+# warning!!! don't modify SETTING_PARTITION_USER_RAW_SIZE!!
+SETTING_PARTITION_USER_RAW_SIZE := 8K
+GLOBAL_DEFINES += SETTING_PARTITION_USER_RAW_SIZE=$(SETTING_PARTITION_USER_RAW_SIZE)
 ################################################################
 # kv
 ################################################################
@@ -194,6 +204,7 @@ $(NAME)_SOURCES :=	aos.c \
 	libc_patch.c \
 	port/soc_impl.c \
 	port/port_tick.c \
+	port/portISR.c \
 	port/ota_soc_init.c \
 	hal/uart.c \
 	hal/flash_port.c \
@@ -205,4 +216,8 @@ $(NAME)_SOURCES :=	aos.c \
 	hal/i2c.c  \
 	hal/spi.c  \
 	$(SDKDIR)/components/net/tcpip/lwip-1.4.0/src/netif/ethernetif.c \
-	hal/hw.c
+	hal/hw.c \
+	hal/pwrmgmt_hal/board_cpu_pwr_rtc.c \
+	hal/pwrmgmt_hal/board_cpu_pwr_standby_rtc.c \
+	hal/pwrmgmt_hal/board_cpu_pwr_systick.c \
+	hal/pwrmgmt_hal/board_cpu_pwr.c

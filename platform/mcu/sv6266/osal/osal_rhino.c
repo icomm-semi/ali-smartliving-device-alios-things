@@ -156,6 +156,60 @@ OS_TICKTYPE OS_GetSysTick(void)
 	return (u32)krhino_sys_tick_get();
 }
 
+#define M_INC_TICK      (990)
+
+uint32_t OS_GetUsSysTick(void)
+{
+    int32_t us_tick;
+    uint32_t tick = 0;
+    uint32_t big_us_tick;
+    int32_t pp, rr;
+#if 1
+    OS_DeclareCritical();
+//    if(taskSCHEDULER_NOT_STARTED==xTaskGetSchedulerState())
+//    {
+//        return 0;
+//    }
+    //big_us_tick = (uint64_t)sys_rtc_tick() * 31.25;
+
+    OS_EnterCritical();
+    us_tick = systick_get_period() - systick_get_remain_count();
+    if (us_tick < 0) {
+        us_tick = 0;
+    }
+    //us_tick = (pp = systick_get_period()) - (rr = systick_get_remain_count());
+    if (systick_get_period() != 1000) {
+        while(1) {
+            printf("!!!!!!!\n");
+            system_delay(10000);
+        }
+    }
+    //if (us_tick < 0) {
+    //    us_tick = 0;
+    //    while(1) {
+    //        OSAL_LOG_I("#######\n");
+    //        OSAL_LOG_I("systick = %d\n", pp);
+    //        OSAL_LOG_I("remain_tick = %d\n", rr);
+    //        system_delay(1000000);
+    //        if (pp > rr) break;
+    //    }
+    //}
+    //us_tick = systick_get_timer_period() - systick_get_remain_count();
+    tick = krhino_sys_tick_get();
+    if (intc_irq_status() & (1<<IRQ_SYSTICK)) {
+        tick += 1;
+        //if (us_tick >= M_INC_TICK) {
+            us_tick = 0;
+        //}
+    }
+    big_us_tick = ((uint32_t) (tick & 0x3FFFFF)) * 1000 + us_tick;
+    OS_ExitCritical();
+#else
+    big_us_tick = (uint32_t)sys_rtc_tick() * 31.25;
+#endif
+    return big_us_tick;
+}
+
 
 /* Mutex APIs: */
 OS_STATUS OS_MutexInit( OsMutex *mutex )

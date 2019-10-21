@@ -81,6 +81,9 @@
 #define MANUFATURE_DEVICEID_TLEN	0x04
 #define MANUFATURE_DEVICEID_RLEN	0x02
 
+#define UNIQUE_ID_CMD		0x4B
+#define UNIQUE_ID_TLEN	    0x05
+#define UNIQUE_ID_RLEN	    0x10
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // MACRO DEF
 //-------------------------------------------------------------------------------------------------
@@ -96,6 +99,17 @@
 unsigned int flash_init(void);
 void flash_sector_erase(unsigned int addr);
 void flash_page_program(unsigned int flash_addr, unsigned int flash_len, unsigned char* src_arr);
+
+/*! \brief get 16Mbits flash unique ID.
+ *
+ *  get unique id.
+ *
+ * \param unique unique id
+ * \param id_len length of unique id (bytes)
+ * \return -1: length not enough
+ *         >0: unique size
+ */
+int flash_unique_id(unsigned char * unique, int id_len);
 
 #if 0
 void flash_dump(unsigned int dump_addr, unsigned int length);

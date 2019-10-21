@@ -6,7 +6,7 @@
 #include <attrs.h>
 //#include <hw_regs_api.h>
 
-#define RX_QUEUE_LEN (64)   //it must be power of 2
+#define RX_QUEUE_LEN (128)   //it must be power of 2
 #define RX_QUEUE_MASK (RX_QUEUE_LEN-1)
 #define PKT_IRQHANDLE 1
 #define KRACK 1
@@ -15,10 +15,13 @@
 
 typedef struct rx_info
 {
+  u8    isoccupied;
+  u8    channel;
   u8* pbuf_addr;
-//  u32 pktlen;
+  u32   pktlen;
+  u32   ht_signal_23_0;
+  u32   ht_signal_47_24;
   unsigned long packettime;
-  u8 isoccupied;
 } rx_info_t;
  
 typedef struct rx_queue
@@ -35,6 +38,7 @@ struct sk_pbuff {
 	u16 len;
 	u8 rssi;
 	u8 bssid;
+    u8 wsid;
 };
 /**
 * enum switch_ops_en (sw_ops) - define enable/disable value.

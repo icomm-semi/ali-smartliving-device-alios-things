@@ -25,18 +25,6 @@ void ssvradio_init_task(void *pdata)
     OS_TaskDelete(NULL);
 }
 
-void temperature_compensation_task(void *pdata)
-{
-    printf("temperature compensation task\n");
-    OS_MsDelay(1*1000);
-    while(1)
-    {
-        OS_MsDelay(3*1000);
-        do_temerature_compensation();
-    }
-    OS_TaskDelete(NULL);
-}
-
 /**********************************************************/
 void APP_Init(void)
 {
@@ -52,16 +40,39 @@ void APP_Init(void)
 	OS_StatInit();
 	OS_MemInit();
 
-    load_rf_table_from_flash();
-    write_reg_rf_table();
-
 	FS_init();
 
     OS_TaskCreate(ssvradio_init_task, "ssvradio_init", 512, NULL, tskIDLE_PRIORITY + 2, NULL);
-    OS_TaskCreate(temperature_compensation_task, "rf temperature compensation", 256, NULL, tskIDLE_PRIORITY + 2, NULL);
     OS_TaskCreate(Cli_Task, "cli", 1024, NULL, 1, NULL);
 
     OS_StartScheduler();
+}
+
+#define M_GPIO_DEFAULT          (0)
+#define M_GPIO_USER_DEFINED     (1)
+
+// this will increase current.
+int lowpower_sleep_gpio_hook() {
+    // do your gpio setting
+    //return M_GPIO_USER_DEFINED;
+    // use default gpio setting.
+    return M_GPIO_DEFAULT;
+}
+
+// this will increase current.
+int lowpower_dormant_gpio_hook() {
+    // do your gpio setting
+    //return M_GPIO_USER_DEFINED;
+    // use default gpio setting.
+    return M_GPIO_DEFAULT;
+}
+
+void lowpower_pre_sleep_hook() {
+    // do nothing
+}
+
+void lowpower_post_sleep_hook() {
+    // do nothing
 }
 
 void vAssertCalled( const char *func, int line )

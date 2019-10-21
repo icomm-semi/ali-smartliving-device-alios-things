@@ -2,9 +2,12 @@
 #include "layout_flash_ilm_dlm.lds.S"
 #define M_VMA_AT(section)  AT (ALIGN(LOADADDR(section) + SIZEOF(section), 4) )
 #define M_VMA_AT_START(section)  AT (ALIGN(LOADADDR(section) + SIZEOF(section), 4) )
-#define M_PARAM_SECTOR_SIZE     16K
+#define M_PARAM_SECTOR_SIZE     (8K+SETTING_PARTITION_USER_RAW_SIZE)
 #define M_FLASH_SECTOR_SIZE     4K
-#define M_RAW_SECTOR_SIZE     	8K
+#if !defined(SETTING_PARTITION_USER_RAW_SIZE)
+    #define SUPPORT_PARTITION_USER_RAW (0)
+#endif
+#define M_RAW_SECTOR_SIZE     	SETTING_PARTITION_USER_RAW_SIZE
 #define M_N10_LOOP              0xD500
 
 ENTRY(_start)
@@ -20,19 +23,32 @@ SECTIONS
     NDS_SAG_LMA_ROM = 0x30000000 ;
     FLASH_BEGIN = NDS_SAG_LMA_ROM;
 
+    __partition_raw_size = M_RAW_SECTOR_SIZE;
+
 #ifndef SUPPORT_BOOTLOADER
-	. = ORIGIN(REGION_BOOT);
-	.magic_boot_entry :
-	{
-		KEEP(*(.magic_boot_entry) )
-		LONG(XTAL);
-		LONG(SYS_BUS_SPEED);
-		LONG(XIP_BIT);
-		LONG(SETTING_PARTITION_MAIN_SIZE);
-		LONG(SETTING_FLASH_TOTAL_SIZE);
-		LONG(SETTING_PSRAM_HEAP_BASE);
-		LONG(SETTING_PSRAM_HEAP_SIZE);		
-	} > REGION_BOOT
+    . = ORIGIN(REGION_BOOT);
+    .magic_boot_entry :
+    {
+        KEEP(*(.magic_boot_entry) )
+        // 0x04
+        LONG(XTAL);
+        // 0x08
+        LONG(SYS_BUS_SPEED);
+        // 0x0C
+        LONG(XIP_BIT);
+        // 0x10
+        LONG(SETTING_PARTITION_MAIN_SIZE);
+        // 0x14
+        LONG(SETTING_FLASH_TOTAL_SIZE);
+        // 0x18
+        LONG(SETTING_PSRAM_HEAP_BASE);
+        // 0x1C
+        LONG(SETTING_PSRAM_HEAP_SIZE);
+        // 0x20
+        LONG(SETTING_UART_FW_UPGRADE);
+        // 0x24
+        LONG(SETTING_PARTITION_USER_RAW_SIZE);
+    } > REGION_BOOT
 #endif	
 	
 	. = ORIGIN(REGION_BURN);

@@ -23,6 +23,9 @@
 #if !defined(SETTING_UART_FW_UPGRADE)
 	#define SETTING_UART_FW_UPGRADE (1)
 #endif
+#if !defined(SETTING_PARTITION_USER_RAW_SIZE)
+	#error no SETTING_PARTITION_USER_RAW_SIZE
+#endif
 
 ENTRY(_start)
 SECTIONS
@@ -31,18 +34,19 @@ SECTIONS
 	NDS_SAG_LMA_FLASH = 0x30000000 ;
 	FLASH_BEGIN = NDS_SAG_LMA_FLASH;
 	. = 0x0 + NDS_SAG_LMA_FLASH;
-	.ota_boot_hdr 	: { KEEP(*(.ota_boot_hdr )) }
-	.ota_boot_info 	: 
-	{
-		LONG(XTAL);
-		LONG(SYS_BUS_SPEED);
-		LONG(XIP_BIT);
-		LONG(SETTING_PARTITION_MAIN_SIZE);
-		LONG(SETTING_FLASH_TOTAL_SIZE);
-		LONG(SETTING_PSRAM_HEAP_BASE);
-		LONG(SETTING_PSRAM_HEAP_SIZE);
-		LONG(SETTING_UART_FW_UPGRADE);
-	}
+    .ota_boot_hdr 	: { KEEP(*(.ota_boot_hdr )) }
+    .ota_boot_info 	:
+    {
+        LONG(XTAL);
+        LONG(SYS_BUS_SPEED);
+        LONG(XIP_BIT);
+        LONG(SETTING_PARTITION_MAIN_SIZE);
+        LONG(SETTING_FLASH_TOTAL_SIZE);
+        LONG(SETTING_PSRAM_HEAP_BASE);
+        LONG(SETTING_PSRAM_HEAP_SIZE);
+        LONG(SETTING_UART_FW_UPGRADE);
+        LONG(SETTING_PARTITION_USER_RAW_SIZE);
+    }
 	.ota_vector 	: { KEEP(*(.ota_vector)) }
 	.ota_boot 	: { KEEP(*(.ota_boot )) }
 	.nds32_init 	: { KEEP(*(.nds32_init )) }
@@ -114,7 +118,7 @@ SECTIONS
 	__data_lmastart =  LOADADDR (.ota_fast_boot_code) + SIZEOF (.ota_fast_boot_code);
 	__data_start = .;
 	. = ALIGN(0x20);
-	.eh_frame 	: AT(ALIGN(LOADADDR (.ota_fast_boot_code) + SIZEOF (.ota_fast_boot_code), 32))
+	.eh_frame 	: AT(LOADADDR (.ota_fast_boot_code) + SIZEOF (.ota_fast_boot_code))
 		{ KEEP(*(.eh_frame )) }
 	.gcc_except_table 	: AT(ALIGN(LOADADDR (.eh_frame) + SIZEOF (.eh_frame), ALIGNOF(.gcc_except_table)))
 		{ KEEP(*(.gcc_except_table )) *(.gcc_except_table.* ) }

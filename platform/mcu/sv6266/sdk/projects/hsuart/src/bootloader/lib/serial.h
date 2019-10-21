@@ -3,7 +3,7 @@
 
 #include "soc_defs.h"
 
-void serial_init(void);
+void serial_init(int baudrate);
 void serial_tx(int);
 int serial_rx_ready(void);
 int serial_rx(void);

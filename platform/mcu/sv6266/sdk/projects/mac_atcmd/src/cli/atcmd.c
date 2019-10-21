@@ -43,6 +43,7 @@
 #ifdef OTA_EN
 #include "ota_api.h"
 #endif
+#include <lowpower.h>
 
 static uint8_t bTXRun = 0;
 static uint8_t ghttprun = 0;
@@ -262,8 +263,12 @@ int At_HKAP(stParam *param)
 /*---------------------------------------------------------------------------*/
 int At_AP (stParam *param)
 {
-//    atcmdprintf("[At_AP] : +++\n");
-    //softap_start();
+    if((get_DUT_wifi_mode() == DUT_AP ) || (get_DUT_wifi_mode() == DUT_CONCURRENT) ||  (get_DUT_wifi_mode() == DUT_SNIFFER))
+    {
+        printf("\nPlease run AT+DUT_START=0 to exit ap mode first\n");
+        return ERROR_NOT_IMPLEMENT;
+    }
+        
     DUT_wifi_start(DUT_AP);
     return ERROR_SUCCESS_NO_RSP;
 }
@@ -390,19 +395,23 @@ int At_GET_APMODE (stParam *param)
 {
     WIFI_OPMODE mode = get_DUT_wifi_mode();
     printf("\r\n");
-    printf("AT+GET_APMODE=%s\n", mode == DUT_AP?"AP":"STA");	
+    printf("AT+GET_APMODE=%s\n", mode == DUT_AP?"AP Mode":"NO AP Mode");	
     return 0;
 }
 /*---------------------------------------------------------------------------*/
 int At_AP_EXIT (stParam *param)
 {
-    softap_exit();
-
-    WIFI_OPMODE mode = get_DUT_wifi_mode();
+    int ret = ERROR_SUCCESS;
+    if((get_DUT_wifi_mode() == DUT_NONE  ) || (get_DUT_wifi_mode() == DUT_STA) ||  (get_DUT_wifi_mode() == DUT_CONCURRENT) ||  (get_DUT_wifi_mode() == DUT_TWOSTA) ||  (get_DUT_wifi_mode() == DUT_TWOSTA))
+    {
+        printf("\nPlease run AT+DUT_START=2 to enter ap mode first\n");
+        return ERROR_NOT_IMPLEMENT;
+    }
     
-    if( mode != DUT_STA )
-        DUT_wifi_start(DUT_STA);
-    return ERROR_SUCCESS_NO_RSP;
+    //softap_exit();
+
+    ret = DUT_wifi_start(DUT_STA);
+    return ret;
 }
 int At_ListStation (stParam *param)
 {
@@ -411,7 +420,7 @@ int At_ListStation (stParam *param)
     u8 number_sta = 4;
     int i=0;
     
-    if(get_DUT_wifi_mode() != DUT_AP )
+    if(get_DUT_wifi_mode() != DUT_AP &&  get_DUT_wifi_mode() != DUT_CONCURRENT )
     {
         printf("\nPlease Enter AP Mode First\n");
         return -1;
@@ -964,7 +973,8 @@ int At_RadioRFTempBoundary(stParam *param)
         return ERROR_INVALID_PARAMETER;
 
     set_temper_value(atoi(param->argv[0]), atoi(param->argv[1]));
-    
+    ssv_rf_table.low_boundary = atoi(param->argv[0]);
+    ssv_rf_table.high_boundary = atoi(param->argv[1]);
     SAVE_RF_TABLE();
     
     return ret;
@@ -1896,10 +1906,39 @@ int At_Reboot (stParam *param)
 
 int At_NetScan (stParam *param)
 {
+    int scan_interval=0;
+
     if((get_DUT_wifi_mode() == DUT_NONE) || (get_DUT_wifi_mode() == DUT_SNIFFER))
         printf("\nPlease run AT+DUT_START=1 first\n");
-    
-    if(scan_AP(scan_cbfunc))
+
+    if(NULL==param->argv[0])
+    {    
+        if(scan_AP(scan_cbfunc))
+            return ERROR_INVALID_PARAMETER;
+    }
+    else
+    {
+        scan_interval=atoi(param->argv[0]);
+        if(scan_AP_3(NULL,scan_interval,scan_cbfunc))
+            return ERROR_INVALID_PARAMETER;
+    }    
+
+    return ERROR_SUCCESS_NO_RSP;
+}
+
+int At_NetScanHidden (stParam *param)
+{
+    if((get_DUT_wifi_mode() == DUT_NONE) || (get_DUT_wifi_mode() == DUT_SNIFFER))
+    {
+        printf("\nPlease run AT+DUT_START=1 first\n");
+        return ERROR_NOT_IMPLEMENT;
+    }
+
+    if (param->argc < 1) {
+        return ERROR_INVALID_PARAMETER;
+    }
+        
+    if(scan_AP_2( param->argv[0], scan_cbfunc))
         return ERROR_INVALID_PARAMETER;
     
     return ERROR_SUCCESS_NO_RSP;
@@ -1927,6 +1966,16 @@ int At_Connect2 (stParam *param)
 }
 int At_Connect (stParam *param)
 {
+    if((get_DUT_wifi_mode() == DUT_NONE) || (get_DUT_wifi_mode() == DUT_AP) ||  (get_DUT_wifi_mode() == DUT_SNIFFER))
+    {
+        printf("\nPlease run AT+DUT_START=1 first\n");
+        return ERROR_NOT_IMPLEMENT;
+    }
+
+    //if AP is open but user set password, we will return fail
+    if( (gwifistatus.connAP[0].security_type == 0 || gwifistatus.connAP[0].security_subType == 0) && gwifistatus.connAP[0].key_len != 0 )
+        return ERROR_WIFI_CONNECTION;
+    
     wifi_connect(atwificbfunc);
     return ERROR_SUCCESS_NO_RSP;
 }
@@ -1934,31 +1983,70 @@ int At_Connect (stParam *param)
 int At_ConnectActive (stParam *param)
 {
     const char delimiters[] = ":";
-    char *pSsid = 0, *pWebkey = 0, *ptmp;
+    char *pSsid = NULL, *pWebkey = NULL, *ptmp=NULL;
     int ssid_len, keylen = 0;
     int ret;
-    int8_t loop_i = 0;
-	
+    int8_t loop_i = 0;	
     unsigned long int toul_val;
     int i = 0;
-       
+    u8 rssi_threshold=0;
+    u8 noreconnect=0;
+    TAG_AP_INFO apInfo;
+    memset(&apInfo,0,sizeof(TAG_AP_INFO));
+
+    if((get_DUT_wifi_mode() == DUT_NONE) || (get_DUT_wifi_mode() == DUT_AP) || (get_DUT_wifi_mode() == DUT_CONCURRENT) || (get_DUT_wifi_mode() == DUT_SNIFFER))
+    {
+        printf("\nPlease run AT+DUT_START=1 first\n");
+        return ERROR_NOT_IMPLEMENT;
+    }
+    
     if (param->argc < 1) {
-        return ERROR_INVALID_PARAMETER;
+        printf("\r\nUsage:\r\n");
+        printf("AT+ACTIVECONNECT=[ssid],[key],[rssi threshold],[reconnect]\r\n");
+        printf("                :[rssi threshold] 0: don't check rssi. >0 check rssi\r\n");
+        printf("                :[reconnect] 1:reconnect, 0:no reconnect\r\n");
+        return ERROR_SUCCESS;
     }
 
+    
     pSsid  = param->argv[0];
-    pWebkey = param->argv[1];
     ssid_len = strlen (pSsid);
+    
+    if(NULL!=param->argv[1])
+    {
+        pWebkey = param->argv[1];
+        if(strlen(pWebkey)<8)
+        {
+            pWebkey=NULL;
+        }
+    }
+
+    if(NULL!=param->argv[2])
+    {
+        rssi_threshold=atoi(param->argv[2]);
+    }
+
+    if(NULL!=param->argv[3])
+    {
+        noreconnect=(atoi(param->argv[3])==0)?1:0;
+
+    }
 
     if(pWebkey)
         keylen = strlen(pWebkey);
-
-    DUT_wifi_start(DUT_STA);
-    ret = wifi_connect_active ( pSsid, ssid_len, pWebkey, keylen, atwificbfunc);
-
+    
+    printf("\nssid=%s,key=%s,rssi_threshold=%d reconnect=%d\n",pSsid,(pWebkey==NULL)?"":pWebkey, rssi_threshold, noreconnect^1);
+    if(0==get_the_max_rssi_ap(pSsid,&apInfo))
+    {
+        ret=wifi_connect_active_5(pSsid,ssid_len, pWebkey, keylen, NET80211_CRYPT_UNKNOWN, apInfo.channel, NULL, noreconnect, rssi_threshold,atwificbfunc);
+    }
+    else
+    {
+        ret=wifi_connect_active_5(pSsid,ssid_len, pWebkey, keylen, NET80211_CRYPT_UNKNOWN, 0, NULL, noreconnect, rssi_threshold,atwificbfunc);
+    }
+END:
     return ret;
 }
-
 int At_Disconnect2 (stParam *param)
 {
     u8 id, *pid;
@@ -2042,7 +2130,13 @@ int At_SetWifiConfig (stParam *param)
 	uint8_t mac[6];
 	unsigned long int toul_val;
         int i = 0;
-       
+
+    if((get_DUT_wifi_mode() == DUT_NONE) || (get_DUT_wifi_mode() == DUT_AP) ||  (get_DUT_wifi_mode() == DUT_SNIFFER))
+    {
+        printf("\nPlease run AT+DUT_START=1 first\n");
+        return ERROR_NOT_IMPLEMENT;
+    }
+    
 	if (param->argc < 2) {
 		return ERROR_INVALID_PARAMETER;
 	}
@@ -2919,8 +3013,166 @@ int At_UartFWUpgrade(stParam *param)
     return ERROR_SUCCESS;
 }
 
+
+void sn_cb(packetinfo *p)
+{
+    OS_EnterCritical();
+    if(p->data!=NULL)
+    {
+        struct ieee80211_hdr_3addr *mgmt = NULL;
+        u8 *data=NULL;
+        data=(u8 *)p->data;
+        mgmt=(struct ieee80211_hdr_3addr *)data;
+        printf("ch=%d, addr2 %x:%x:%x:%x:%x:%x,seq=%d\r\n",
+            p->channel,    
+            mgmt->addr2[0],mgmt->addr2[1],mgmt->addr2[2],mgmt->addr2[3],mgmt->addr2[4],mgmt->addr2[5],
+            mgmt->seq_ctrl>>4,p->len);
+    }
+    else
+    {
+        u32 ht_signal_23_0=0;
+        u32 ht_signal_47_24=0;
+
+	    ht_signal_23_0=p->ht_signal_23_0;
+        ht_signal_47_24=p->ht_signal_47_24; 
+        printf("ch=%d, ht_mcs=%d,ht_len=%d\n",p->channel, ht_signal_23_0&0x7F,p->len);
+    }
+    OS_ExitCritical();
+}
+int At_Sniffer(stParam *param) 
+{
+    //u8 target_mac[6]={0x74,0xd0,0x2b,0xD2,0x6C,0xD0};
+    set_sniffer_config(0xC,sn_cb);
+    //set_sniffer_config_2(0xC,sn_cb,300,200,target_mac);
+    DUT_wifi_start(DUT_SNIFFER);
+    return ERROR_SUCCESS;
+}
+
+
 /*---------------------------------------------------------------------------*/
 int At_CmdList (stParam *param);
+
+#if defined(SUPPORT_LOW_POWER) && (SUPPORT_LOW_POWER == 1)
+void power_mode_usage() {
+    printf("usage:\n");
+    printf("\t0: mcu always on, rf always on.\n");
+    printf("\t1: mcu standby, rf always on.\n");
+    printf("\t2: mcu always on, DTIM\n");
+    printf("\t3: mcu standby, DTIM\n");
+    printf("\t4: sleep, DTIM\n");
+}
+
+void dormant_usage() {
+    printf("usage:\n");
+    //printf("\tparam1: seconds.(0-134217)\n");
+    // prevent rtc issue.
+    printf("\tparam1: seconds.(0-120000)\n");
+    printf("\tparam2: micro seconds.(0-1000000)\n");
+    printf("\tmin sleep time need over 2000us\n");
+}
+
+int At_sleep(stParam *param) ATTRIBUTE_SECTION_FAST;
+int At_sleep(stParam *param) {
+    DUT_wifi_start(DUT_NONE);
+    DUT_wifi_OFF();
+    printf("!sleep start!!\n");
+    OS_EnterCritical();
+    sys_sleep(0);
+    OS_ExitCritical();
+    printf("wakeup!!\n");
+    return 0;
+}
+
+int At_dormant(stParam *param) ATTRIBUTE_SECTION_FAST;
+int At_dormant(stParam *param) {
+    if (param->argc != 2) {
+        dormant_usage();
+        return 0;
+    }
+    struct timeval tv;
+    tv.tv_sec = strtol(param->argv[0], NULL, 10);
+    tv.tv_usec = strtol(param->argv[1], NULL, 10);
+    if (tv.tv_sec < 0) {
+        printf("not support little time sleep for %dsec\n", tv.tv_sec);
+        return 0;
+    }
+    if (tv.tv_sec > 134217) {
+        printf("not support super big time sleep for %dsec\n", tv.tv_sec);
+        return 0;
+    }
+    DUT_wifi_start(DUT_NONE);
+    DUT_wifi_OFF();
+    OS_EnterCritical();
+    //sys_rtc_cali();
+    sys_dormant(&tv);
+    OS_ExitCritical();
+    printf("time=%d.%06d\n", tv.tv_sec, tv.tv_usec);
+    return 0;
+}
+
+int At_power_mode(stParam *param) {
+    if (param->argc != 1) {
+        power_mode_usage();
+        return 0;
+    }
+    switch(param->argv[0][0]) {
+        case '1':
+            lowpower_mode(E_LOW_POWER_STANDBY);
+            set_power_mode(0, DUT_STA);
+            break;
+        case '2':
+            lowpower_mode(E_LOW_POWER_ACTIVE);
+            set_power_mode(1, DUT_STA);
+            break;
+        case '3':
+            lowpower_mode(E_LOW_POWER_STANDBY);
+            set_power_mode(1, DUT_STA);
+            break;
+        case '4':
+#if defined(SETTING_RTC_CALI_INTERVAL) && (SETTING_RTC_CALI_INTERVAL != 0)
+            //OS_TimerStart(g_rtc_cali_tmr);
+#endif
+            lowpower_mode(E_LOW_POWER_SLEEP);
+            set_power_mode(1, DUT_STA);
+            break;
+        case '0':
+        default:
+            lowpower_mode(E_LOW_POWER_ACTIVE);
+            set_power_mode(0, DUT_STA);
+            break;
+    }
+    return 0;
+}
+
+int At_gpio_wakeup(stParam *param) {
+    uint32_t sleep_time_us  ;//= strtol(param->argv[0], NULL, 10);
+    uint32_t counter        ;//= strtol(param->argv[1], NULL, 10);
+    uint32_t gpio           = strtol(param->argv[0], NULL, 10);
+    uint32_t int_mode       = strtol(param->argv[1], NULL, 10);
+
+    rtc_sleep_st rtc_sleep = {0};
+    uint32_t counter2 = 0;
+    sleep_time_us = 0xFFFFFFFF;
+    counter = 1;
+
+    printf("\n");
+    printf("GPIO     (%d)\n", gpio);
+    printf("INT_MODE (%d)\n", int_mode);
+
+    //limitation :
+    //low to high, multiple pin
+    //high to low , single pin
+
+    drv_gpio_set_wakeup_detect(int_mode);
+    drv_gpio_set_mode(gpio,PIN_MODE_GPIO);
+    drv_gpio_set_dir(gpio,GPIO_DIR_IN);
+
+    drv_gpio_set_wakeup_enable(gpio);
+    drv_gpio_intc_trigger_mode(gpio,int_mode);
+
+    return ERROR_SUCCESS_NO_RSP;
+}
+#endif
 
 /*---------------------------------------------------------------------------*/
 const at_cmd_info atcmdicomm_info_tbl[] =
@@ -2929,7 +3181,8 @@ const at_cmd_info atcmdicomm_info_tbl[] =
     {ATCMD_HELP,               At_Help,               0},
 #if 1    
     {ATCMD_VERSION,            At_GetVersion,         0},
-    {ATCMD_MINFO ,            At_GetManufactureInfo,             0},       
+    {ATCMD_MINFO ,            At_GetManufactureInfo,             0}, 
+    {ATCMD_NETSCAN_HIDDEN,            At_NetScanHidden,            0},
     {ATCMD_NETSCAN,            At_NetScan,            0},
     {ATCMD_SETWIFICONFIG,      At_SetWifiConfig,      0},
     {ATCMD_SETWIFICONFIG2,      At_SetWifiConfig2,      0},
@@ -3143,6 +3396,12 @@ const at_cmd_info atcmdicomm_info_tbl[] =
     {ATCMD_MAC_HW_MIB         ,At_MacHWMIB          ,0},
 #if (SETTING_UART_FW_UPGRADE == 0)
     {ATCMD_UART_FW_UPGRADE    ,At_UartFWUpgrade     ,0},
+#endif
+    {ATCMD_SNIFFER,            At_Sniffer,           -1}, 
+#if defined(SUPPORT_LOW_POWER) && (SUPPORT_LOW_POWER == 1)
+    {ATCMD_GPIO_WAKEUP       , At_gpio_wakeup, 2},       //GPIO INT with PMU wakeup
+    {ATCMD_POWERMODE         , At_power_mode, 1},
+    {ATCMD_DORMANT           , At_dormant, 2},
 #endif
     {ATCMD_LIST               ,At_CmdList           ,0},
 };

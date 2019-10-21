@@ -321,6 +321,33 @@ void APP_Init(void)
     OS_StartScheduler();
 }
 
+#define M_GPIO_DEFAULT          (0)
+#define M_GPIO_USER_DEFINED     (1)
+
+// this will increase current.
+int lowpower_sleep_gpio_hook() {
+    // do your gpio setting
+    //return M_GPIO_USER_DEFINED;
+    // use default gpio setting.
+    return M_GPIO_DEFAULT;
+}
+
+// this will increase current.
+int lowpower_dormant_gpio_hook() {
+    // do your gpio setting
+    //return M_GPIO_USER_DEFINED;
+    // use default gpio setting.
+    return M_GPIO_DEFAULT;
+}
+
+void lowpower_pre_sleep_hook() {
+    // do nothing
+}
+
+void lowpower_post_sleep_hook() {
+    // do nothing
+}
+
 void vAssertCalled( const char *func, int line )
 {
 	printf("<!!!OS Assert!!!> func = %s, line=%d\n", func, line);

@@ -8,6 +8,7 @@
 #include "wifi_api.h"
 #include "ieee80211.h"
 #include "osal/osal.h"
+#include <stdio.h>
 
 #define SC_OK   1
 #define SC_NG   0

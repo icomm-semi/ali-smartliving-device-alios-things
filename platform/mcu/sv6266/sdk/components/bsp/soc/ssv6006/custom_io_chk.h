@@ -156,9 +156,9 @@
 #endif
 
 #if ((M_CUSTOM_P06_MODE) == (M_CUSTOM_ALT0))
-#if ((M_CUSTOM_P05_MODE) == (M_CUSTOM_ALT0) && \
-        (M_CUSTOM_P07_MODE) == (M_CUSTOM_ALT0) && \
-        (M_CUSTOM_P09_MODE) == (M_CUSTOM_ALT0))
+#if (\
+        1 \
+        )
 #define _M_P06_MODE     (0x0 << UART1_RXD)
 #define _M_P06_FUNC_SEL    (0)
 #endif
@@ -189,9 +189,9 @@
 #endif
 
 #if ((M_CUSTOM_P07_MODE) == (M_CUSTOM_ALT0))
-#if ((M_CUSTOM_P05_MODE) == (M_CUSTOM_ALT0) && \
-        (M_CUSTOM_P06_MODE) == (M_CUSTOM_ALT0) && \
-        (M_CUSTOM_P09_MODE) == (M_CUSTOM_ALT0))
+#if ( \
+        1 \
+        )
 #define _M_P07_MODE     (0x0 << UART1_TXD)
 #define _M_P07_FUNC_SEL    (0)
 #endif

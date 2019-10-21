@@ -72,6 +72,11 @@ typedef enum {
 } RTStatus;
 
 typedef struct {
+    uint8 channel;
+    uint8 type;
+} sniffe_mode;
+
+typedef struct {
     uint16 ver:2;                  // Protocol version
     uint16 type:2;               // MSDU type
     uint16 subType:4;        // MSDU subtype
@@ -105,7 +110,7 @@ typedef struct {
 
 typedef struct {
     uint8 secretKey[KEY_STR_MAX_LEN];    /**< security key storage*/
-    void (*switchChCallback)(uint8);             /**< switch channel callback*/
+    void (*switchChCallback)(uint8, uint8); /**< switch channel callback*/
     void (*resultCallback)(RTResult);            /**< result callback*/
 } RTParams;
 

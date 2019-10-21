@@ -19,13 +19,6 @@
 /*****************************************************************************
  *  CONFIG_HEADER
  ****************************************************************************/
-#ifdef XIP_MODE
-	#define PARTITION_BOOT_SIZE			0x4000
-	#define PARTITION_PARAM_SIZE		0x4000
-	#define MAGIC_HEADER_BASE			0x30000000
-#else
-	#define MAGIC_HEADER_BASE			0x00000000
-#endif
 #if 1
 	#define OFFSET_XTAL					0x04
 	#define OFFSET_BUSCLK				0x08
@@ -35,6 +28,14 @@
 	#define OFFSET_PSRAM_HEAP_BASE		0x18
 	#define OFFSET_PSRAM_HEAP_SIZE		0x1c
 	#define OFFSET_UART_FW_UPGRADE		0x20
+	#define OFFSET_PARTITION_RAW        0x24
+#endif
+#ifdef XIP_MODE
+	#define MAGIC_HEADER_BASE			0x30000000
+	#define PARTITION_BOOT_SIZE			0x4000
+	#define PARTITION_PARAM_SIZE		0x2000+REG32(MAGIC_HEADER_BASE+OFFSET_PARTITION_RAW)
+#else
+	#define MAGIC_HEADER_BASE			0x00000000
 #endif
 /*****************************************************************************
  * IRQ Vector
@@ -64,6 +65,7 @@
 #define IRQ_MBOX_ALT       (18)
 #define IRQ_MBOX           (19)
 #define IRQ_UTIMER_0          (20)
+#define IRQ_SYSTICK           (20)
 #define IRQ_UTIMER_1          (21)
 #define IRQ_UTIMER_2          (22)
 #define IRQ_UTIMER_3          (23)

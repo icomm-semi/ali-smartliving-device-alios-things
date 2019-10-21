@@ -178,16 +178,6 @@ typedef enum t_TAG_SECURITY
 	WPAWPA2,
 } TAG_SECURITY;
 
-typedef enum t_POWER_MODE
-{
-	PSACTIVE_MODE = 0,
-	PSSAVING_MODE,
-    TEMP_ACTIVE, //There is data to send or receive, go to active mode temporarily.
-    TRANS_TO_PS, //Means there is a packet send to AP with the power management bit is power save mode.
-    TRANS_TO_AC, //Means there is a packet send to AP with the power management bit is active mode.
-    TRANS_TO_ACTMP, //Means there is a packet send to AP with the power management bit is active mode.
-} POWER_MODE;
-
 typedef enum t_TAG_SECURITY_TYPE
 {
 	NOSECTYPE = 0,
@@ -203,9 +193,12 @@ typedef union uip_ip4addr_t {
 } uip_ip4addr_t;
 
 typedef struct packetinfo {
+  u8 channel;
   u8  *data;			
   u16 len;
   s16 rssi;
+  u32 ht_signal_23_0;
+  u32 ht_signal_47_24;
 } packetinfo;
 
 typedef enum 
@@ -311,6 +304,14 @@ typedef struct _CUSTOM_CONFIG {
     u32 available_5Gchannel;
 }CUSTOM_CONFIG;
 
+typedef struct _STA_CUSTOM_CONFIG {
+    u8 IF0_L2keepalive_en;
+    u8 IF1_L2keepalive_en;
+    u16 IF0_L2keepalive_sec;
+    u16 IF1_L2keepalive_sec;
+    u16 APlist_amount;
+}STA_CUSTOM_CONFIG;
+
 typedef enum {
     RECV_BEACON             = 0x1,
     RECV_MGMT               = 0x2,
@@ -341,8 +342,9 @@ typedef enum {
 
 enum {
     NO_SECONDCH = 0,
-    UPPER_SECONDCH,
+    RESERVED,
     LOWER_SECONDCH,
+    UPPER_SECONDCH,
 };
 
 typedef enum {
@@ -353,6 +355,12 @@ typedef enum {
     JP,
     COUNTRY_MAX,
 }COUNTRY_CODE;
+
+typedef enum {
+	SCAN_END,
+	SCAN_ONGOING,
+    SCAN_TERMINATING,
+}SCAN_STATE;
 
 typedef enum {
     RADIO_BAND_2G=0,
@@ -379,6 +387,7 @@ typedef enum {
 
 typedef struct _SOFTAP_EAPOL_MSG {
     SOFTAP_EAPOL_ACTION state;
+    u8 wsid;
 } SOFTAP_EAPOL_MSG;
 
 typedef struct 
@@ -429,6 +438,8 @@ typedef struct t_AP_DETAIL_INFO
     u16                   unicastseq;
     u8 	                  action;
     u8 	                  status;
+    u8 	                  l2keepalive_en;    
+    u8 	                  l2keepalive_sec;    
     u8	                  wifi_security;
     u8	                  priority;
     u8 					  idle_count;
@@ -437,6 +448,9 @@ typedef struct t_AP_DETAIL_INFO
     u8 					  wmm_support;
     u8                    dtim_period;
     u8                    secondchinfo;
+    u8                    noreconnect;
+    u8                    rssi_threshold;
+    u8                    forcenmode;
 } AP_DETAIL_INFO;
 
 typedef struct t_IEEE80211STATUS
@@ -446,8 +460,6 @@ typedef struct t_IEEE80211STATUS
     u8                  ifmode[2];
     u8                  mac0_en;
     u8                  mac1_en;
-    u8                  radioprocack;
-    u8                  available_index;
     CUSTOM_CONFIG       customconf;
 	AP_DETAIL_INFO		connAP[2];
 
@@ -461,12 +473,16 @@ typedef struct t_IEEE80211STATUS
     u32 region_code;
     u32 watch_dog_count; //unit: (mini-seconds)    
 
+    u8  available_index;
     u8	recordAP;      
-    u8  support_5G;
     u8  countrycode;
     u8  atuartid;
     u8  atuartrate;
     u8  baserate;
+    u8  powersave_enable;
+    u8  scanstatus;
+    OsTaskHandle scantask;
+    void (*scancallbackfn)(void *);
     
     //softap status!!
     OsBufQ        dhcps_que;
@@ -493,6 +509,7 @@ typedef struct t_IEEE80211STATUS
     u8 softap_tmp_htsupp;
     u8 softap_tmp_wmmsupp;
     u8 softap_ht40info;
+    u8 softap_dfsignore;
 	
     STA_INFO softap_sta_info[4];
 
@@ -534,7 +551,10 @@ typedef struct t_IEEE80211STATUS
     void (*mgmtcbfn)(packetinfo *);
     void (*sniffercb)(packetinfo *);
     u32 snifferfilter;   
-    
+    u32 sniffer_max_len;
+    u32 sniffer_min_len;
+    u8  sniffer_mac[6];
+
     DATARATE_INFO		  rateinfo[5];
     u16                   rc_mask;
 

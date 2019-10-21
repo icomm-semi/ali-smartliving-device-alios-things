@@ -10,3 +10,4 @@ $(NAME)_SOURCES :=
 $(NAME)_SOURCES += sa_cfg.c
 $(NAME)_SOURCES += mac_cfg.c
 $(NAME)_SOURCES += user_cfg.c
+$(NAME)_SOURCES += country_cfg.c

@@ -20,8 +20,9 @@ enum nl80211_reg_rule_flags {
 };
 
 typedef struct {
-    u32 ch;
-    u32 flag;
+    u8 ch;
+    u8 ht40secch;
+    u8 dfs;
 }CHANNEL_INFO;
 
 typedef struct {

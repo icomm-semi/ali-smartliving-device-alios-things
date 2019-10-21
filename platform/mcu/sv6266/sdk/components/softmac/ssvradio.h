@@ -9,4 +9,6 @@
 #define MAC_REG_READ(_r, _v)   hw_reg_read(_r, _v)
 #define RADIO_TASK_SLEEP_TIME 3000 //unit is ms
 
+bool is_5g_band_support(void);
+
 #endif /* _SSVRADIO_H_ */

@@ -97,6 +97,8 @@ static void interrupt (int32_t argc, char *argv[])
     drv_hsuart_init ();
     drv_hsuart_sw_rst ();
     drv_hsuart_set_fifo (HSUART_INT_RX_FIFO_TRIG_LV_16);
+
+    // !!!! TODO: if hsuart CTS/RTS setup to GPIO, please not to setup hardware flow control. !!!!
     drv_hsuart_set_hardware_flow_control (16, 24);
     retval = drv_hsuart_set_format (BaudRate, DataBits, StopBits, Parity);
     drv_hsuart_register_isr (HSUART_RX_DATA_READY_IE, hsuart_isr);
@@ -174,6 +176,8 @@ static void loopback (int32_t argc, char *argv[])
     drv_hsuart_init ();
     drv_hsuart_sw_rst ();
     drv_hsuart_set_fifo (HSUART_INT_RX_FIFO_TRIG_LV_16);
+
+    // !!!! TODO: if hsuart CTS/RTS setup to GPIO, please not to setup hardware flow control. !!!!
     drv_hsuart_set_hardware_flow_control (16, 24);
     retval = drv_hsuart_set_format (BaudRate, DataBits, StopBits, Parity);
 

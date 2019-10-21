@@ -1,6 +1,7 @@
 #ifndef _SOFT_AP_DEF_H
 #define _SOFT_AP_DEF_H
 
+#define MAX_AP_CLIENTS 4
 #define ENABLE_HK (1)	//in original cabrio-rtos,it's in soft_ap.h
 
 typedef enum _SOFTAP_SECURITY

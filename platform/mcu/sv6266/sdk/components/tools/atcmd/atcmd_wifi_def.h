@@ -134,13 +134,22 @@
  * | param         | none        |
  * | return value  | AT+LIST_STA=OK |
  * | example       | AT+LIST_STA | 
- * 
+ *
+ * @subsection ATCMD_wifi_17 Scan Hidden AP  
+ *
+ * | command     | AT+SCAN=<ssid> |
+ * |---------------|-------------------|
+ * | param         | <ssid>: hidden ap ssid         |
+ * | return value  | <id> - <ssid>, <rssi>, <channel>, <mac>               |
+ * | example       | AT+SCAN=SSV_AP
+ *  
  */
 #ifndef ATCMD_WIFI_DEF_H__
 #define ATCMD_WIFI_DEF_H__
 
 #define ATCMD_DUT_START             "AT+DUT_START"
 #define ATCMD_NETSCAN               "AT+SCAN"
+#define ATCMD_NETSCAN_HIDDEN               "AT+SCAN_HIDDEN"
 #define ATCMD_SETWIFICONFIG	        "AT+SET_WIFICONFIG"
 #define ATCMD_SETIFCONFIG           "AT+SET_IFCONFIG"
 #define ATCMD_CONNECT               "AT+WIFICONNECT"
@@ -188,4 +197,9 @@
 #define ATCMD_FIXRATE               "fixrate"
 #define ATCMD_RC_MASK               "rc_mask"
 #define ATCMD_MAC_DBG               "AT+MACDBG"
+#define ATCMD_SNIFFER               "sniffer"
+
+#define ATCMD_GPIO_WAKEUP           ("AT+GPIO_WAKEUP")
+#define ATCMD_POWERMODE             ("AT+POWERMODE")
+#define ATCMD_DORMANT               ("AT+DORMANT")
 #endif

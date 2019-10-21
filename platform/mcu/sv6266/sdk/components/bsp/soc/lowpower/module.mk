@@ -1,7 +1,7 @@
 
-LIB_SRC := rtos_lowpower.c lowpower_control.c
+LIB_SRC := rtos_lowpower.c
 
-#LIB_ASRC := retention_start.S
+LIB_ASRC :=
 LIBRARY_NAME := lowpower
 LOCAL_CFLAGS :=
 LOCAL_AFLAGS :=

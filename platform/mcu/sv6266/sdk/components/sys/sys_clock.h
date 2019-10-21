@@ -3,5 +3,6 @@
 
 uint32_t sys_bus_clock(void);
 uint32_t sys_xtal_clock(void);
+void sys_clock_slow_wfi();
 
 #endif

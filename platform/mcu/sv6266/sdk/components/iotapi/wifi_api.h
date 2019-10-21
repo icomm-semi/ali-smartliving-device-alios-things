@@ -15,6 +15,13 @@ typedef struct CONNSTAINFO
 }CONNSTAINFO;
 
 /**
+ * @brief Turn off RF & MAC & PHY to reduce power consumption. When start WIFI function the DUT will tuen on RF & MAC & PHY automatically.
+ *        This API only work at WIFI_NONE mode.
+ * @return the result. 0 : Successful, -1 : Failed.
+ */
+int DUT_wifi_OFF();
+
+/**
  * @brief Get DUT current operation mode.
  * @return operation mode.
  */
@@ -51,19 +58,69 @@ int scan_AP(void (*callbackfn)(void *));
  * @param callbackfn   [IN] callback function.
  * @return none.
  */
-int scan_AP_ex(char *ssid, void (*callbackfn)(void *));
+int scan_AP_2(char *ssid, void (*callbackfn)(void *));
+#define scan_AP_ex scan_AP_2
+
+/**
+ * @brief Start scan task, only scan channel in 2.4G band. THe callback function will be excuted when scan task is ended.
+ * @param ssid                      [IN] Assign a specific ssid, the maximum length of ssid is 32, the maximum length doesn't include the terminal character 
+ * @param scantime_in_ms            [IN] how many time that stay in one channel
+ * @param callbackfn                [IN] callback function.
+ * @return none.
+ */
+int scan_AP_3(char *ssid, u16 scantime_in_ms, void (*callbackfn)(void *));
 
 /**
  * @brief Start scan task. THe callback function will be excuted when scan task is ended.
  * @param ssid            [IN] Assign a specific ssid, the max length of ssid is 32 
  * @param callbackfn      [IN] callback function.
- * @param channelindex    [IN] Set the specific 2.4G channels to scan.
- * @param channel5Gindex  [IN] Set the specific 5G channels to scan.
- * @param scantime_in_ms  [IN] Scan time for each channel.
+ * @param channelindex    [IN] Set the specific 2.4G channels to scan. Set 0 to scan all available 2.4G channels.
+ * @param channel5Gindex  [IN] Set the specific 5G channels to scan. Set 0 to scan all available 5G channels.
+ * @param scantime_in_ms  [IN] Scan time for each channel. Set 0 DUT will scan 250ms for each channel.
  * @return none.
  */
 int scan_AP_custom(char *ssid, void (*callbackfn)(void *), u16 channelindex, u32 channel5Gindex, u16 scantime_in_ms);
 
+/**
+ * @brief Start connect to AP. This API is used for connect to the AP with hidden SSID.
+ *        In TWOSTA mode, it's working when there's no any connection. 
+ *        Otherwise, it will return -1.
+ * @param pssid		        [IN] AP's SSID.
+ * @param ssidlen	        [IN] Length of SSID.
+ * @param pkey              [IN] AP's Passphrase.
+ * @param keylen            [IN] Length of passphrase.
+ * @param sectype           [IN] The encryption method. 0 : NONO. 1 : WEP. 2 : TKIP. 3 : CCMP.
+                                                       4 : TKIP or CCMP. 5 : Allow all encryption method.
+ * @param channel           [IN] Set the specific channel to do connection, channel set 0 means all channels are possible.
+ * @param mac               [IN] AP's mac address. Input NULL if do not want to connect to specific AP.
+ * @param noreconnecrt      [IN] 0:run reconnect after disconnection. 1: Don't run reconnect after disconnection
+ * @param rssi_threshold    [IN] DUT will find a AP that SSSID is the same with pssid that the RSSI is stronger than rssi_threshold. If there is not a AP that SSID is the same with pssid that RSSI is stronger than rssi_threshold, DUT will choose a max rssi AP that SSID is the same with pssid.
+ *                              0:don't check this condiction. 
+ *                              > 0 
+ * @param callbackfn        [IN] callback function.
+ * @return the result. 0 : Successful, -1 : Failed.
+ */
+
+int wifi_connect_active_5 (u8 *pssid, u8 ssidlen, u8 *pkey, u8 keylen, u8 sectype, u8 channel, u8 *mac, u8 noreconnect, u8 rssi_threshold, void (*callbackfn)(WIFI_RSP*));
+
+/**
+ * @brief Start connect to AP. This API is used for connect to the AP with hidden SSID.
+ *        In TWOSTA mode, it's working when there's no any connection. 
+ *        Otherwise, it will return -1.
+ * @param pssid		   [IN] AP's SSID.
+ * @param ssidlen	   [IN] Length of SSID.
+ * @param pkey         [IN] AP's Passphrase.
+ * @param keylen       [IN] Length of passphrase.
+ * @param sectype      [IN] The encryption method. 0 : NONO. 1 : WEP. 2 : TKIP. 3 : CCMP.
+                                                   4 : TKIP or CCMP. 5 : Allow all encryption method.
+ * @param channel      [IN] Set the specific channel to do connection, channel set 0 means all channels are possible.
+ * @param mac          [IN] AP's mac address. Input NULL if do not want to connect to specific AP.
+ * @param noreconnecrt [IN] 0:run reconnect after disconnection. 1: Don't run reconnect after disconnection
+ * @param callbackfn   [IN] callback function.
+ * @return the result. 0 : Successful, -1 : Failed.
+ */
+
+int wifi_connect_active_4 (u8 *pssid, u8 ssidlen, u8 *pkey, u8 keylen, u8 sectype, u8 channel, u8 *mac, u8 noreconnect, void (*callbackfn)(WIFI_RSP*));
 /**
  * @brief Start connect to AP. This API is used for connect to the AP with hidden SSID.
  *        In TWOSTA mode, it's working when there's no any connection. 
@@ -107,6 +164,22 @@ int wifi_connect_active_2 (u8 *pssid, u8 ssidlen, u8 *pkey, u8 keylen, void (*ca
  * @return the result. 0 : Successful, -1 : Failed.
  */
 int wifi_connect_active (u8 *pssid, u8 ssidlen, u8 *pkey, u8 keylen, void (*callbackfn)(WIFI_RSP*));
+
+
+/**
+ * @brief Start connect to AP. THe callback function will be excuted when wifi status is changed.
+ *        if the staid is illegal, it will return -1.
+ *        If it's doesn't allos run this api in DUT operation mode. it will return -2.
+ *        Channel of the second connection must same as the channel of exsited connection.
+ *        Otherwise, it will return -3.
+ *        Mac address of the second connection must different from the mac address of exsited connection.
+ *        Otherwise, it will return -4.
+ * @param staid        [IN] The sta index will like to start connection(0 or 1).
+ * @param noreconnect  [IN] 0: reconnect after disconnection, 1: no reconnect after disconnection
+ * @param callbackfn   [IN] callback function.
+ * @return the result. 0 : Successful, others : Failed.
+ */
+int wifi_connect_3(u8 staid, u8 noreconnect, void (*callbackfn)(WIFI_RSP*));
 
 /**
  * @brief Start connect to AP. THe callback function will be excuted when wifi status is changed.
@@ -211,6 +284,13 @@ u8 get_ap_lsit_total_num(void);
 int get_ap_list(TAG_AP_INFO *plist, u8 *avaliable);
 
 /**
+ * @brief get the AP information with maximum rssi.  
+ * @param ssid		[IN] you can assign a specific ssid or not. 
+ * @param pAPInfo   [OUT] the AP's information with max rssie
+ * @return the result. 0 : Successful, -1 : Failed.
+ */
+int get_the_max_rssi_ap(char *ssid,TAG_AP_INFO *pAPInfo);
+/**
  * @brief Get the configuration of network interfaces. 
  * @param pdhcpen	     [OUT] DHCP functionally. 0 : disable DHCP, 1 : enable DHCP.
  * @param pipaddr		 [OUT] The IP address of this host.
@@ -290,6 +370,19 @@ int get_connectsta_info(CONNSTAINFO *info, u8 *number);
  * @return none.
  */
 void set_sniffer_config(SNIFFER_RECVINDEX index, void (*sniffercb)(packetinfo *));
+
+/**
+ * @brief Configures the settings of sniffer mode. 
+ * @param index	         [IN] set which kind of frame would like to receive.
+ * @param sniffercb		 [IN] When receive the expect frame, it will call the callback function and offer the detail frame information.
+                              The first parameter is pointer of the frame. The second parameter is the length of the frame.
+ * @param min_len        [IN] set the filter condiction. If the lenght of packet is larger than this value, driver will free this packet.                 
+ * @param max_len        [IN] set the filter condiction. If the lenght of packet is smaller than this value, driver will free this packet.                            
+ * @param target_mac     [IN] set the filter condiction. Only keep the packets that are from this mac address
+ * @return none.
+ */
+
+void set_sniffer_config_2(SNIFFER_RECVINDEX index, void (*sniffercb)(packetinfo *), u32 max_len, u32 min_len, u8 *target_mac);
 void clear_rxque_buffer();
 
 /**
@@ -330,6 +423,14 @@ int wifi_unregister_radio_send_cb(void (*radio_send_debug_cb)(void *data));
  *@ configure the amout of ap list. This function should be called before DUT_START
 */
 int wifi_set_ap_list_amount(u32 amount);
+
+/**
+ *@Configure L2 keep alive behavior. This setting will be apply when start STA mode after execute API.
+ *@param keepalive_en	 [IN] 1 : enable L2 keep alive. 0 : disable L2 keep alive.
+ *@param prriod_ms		 [IN] The period of L2 keep alive.
+ *@return 0: success, -1:fail 
+*/
+int wifi_set_sta_l2keepalive(u8 id, u8 keepalive_en, u16 prriod_sec);
 
 /**
  *@ send null data to AP, this function only works when a STA interface is working

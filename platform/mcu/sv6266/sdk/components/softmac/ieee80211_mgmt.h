@@ -63,7 +63,8 @@ void Scan_AP_Task( void *args );
 void wifi_mgmt_task(void *args);
 void rx_process_mgmt() ;
 u8 getAvailableIndex();
-
+TAG_AP_INFO *get_ap_info_by_ssid(char *ssid,u8 ssid_len);
+int get_max_rssi_ap_info_by_ssid(char *ssid,TAG_AP_INFO *pAPInfo);
 s32 tx_probe_req(u8 wsid);
 s32 tx_authentication_req_seq1 (u8 wsid, u8 alg);
 void softap_rx_assoc_req(struct ieee80211_hdr_3addr * mgmt, u8 wsid);
@@ -79,6 +80,7 @@ void rx_mgmt_action (struct ieee80211_hdr_3addr * mgmt, u8 bssid);
 void rx_probe_rsp_handler (struct ieee80211_hdr_3addr *mgmt, u8 wsid);
 void mgmt_msg_post(u8 isisr, u8 wsid, u8 action);
 int wifi_connect_start(u8 staid, u8 activeconn, void (*cbfn)(WIFI_RSP*));
+int wifi_passive_disconnect_process(WIFI_DIS_REASON reason, u16 reasoncode, u8 bssid);
 
 typedef void (*mgmt_Handler)(struct ieee80211_hdr_3addr *m, u8 wsid);
 

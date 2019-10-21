@@ -14,6 +14,7 @@ typedef struct
 	u32 gw;	    //ex:172.31.254.250
 	u32 subnet;	//ex:255.255.255.0
 	
+	s8 dfsignore;
 	s8 max_sta_num;
 	s8 encryt_mode;	
 	s8 keylen;

@@ -184,7 +184,7 @@
 
 /* kernel idle conf */
 #ifndef RHINO_CONFIG_IDLE_TASK_STACK_SIZE
-#define RHINO_CONFIG_IDLE_TASK_STACK_SIZE    200
+#define RHINO_CONFIG_IDLE_TASK_STACK_SIZE    500
 #endif
 
 /* kernel hook conf */
@@ -230,6 +230,22 @@
 
 #ifndef RHINO_CONFIG_PANIC
 #define RHINO_CONFIG_PANIC                   0
+#endif
+
+#ifndef WIFI_CONFIG_SUPPORT_LOWPOWER
+#define WIFI_CONFIG_SUPPORT_LOWPOWER         1
+#endif
+
+#ifndef WIFI_CONFIG_LISTENSET_BINIT
+#define WIFI_CONFIG_LISTENSET_BINIT          0
+#endif
+
+#ifndef WIFI_CONFIG_LISTEN_INTERVAL
+#define WIFI_CONFIG_LISTEN_INTERVAL          1
+#endif
+
+#ifndef WIFI_CONFIG_RECEIVE_DTIM
+#define WIFI_CONFIG_RECEIVE_DTIM             1
 #endif
 
 #endif /* CONFIG_H */

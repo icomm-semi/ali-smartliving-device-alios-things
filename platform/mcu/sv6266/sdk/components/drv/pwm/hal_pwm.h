@@ -18,4 +18,11 @@ int8_t hal_pwm_enable(uint8_t pwm_id);
 int8_t hal_pwm_disable(uint8_t pwm_id);
 int8_t hal_pwm_enable_all(void);
 
+void hal_pwm_set_pscaler(uint8_t pwm_id, uint32_t pscaler);
+void hal_pwm_set_period(uint8_t pwm_id, uint32_t period);
+void hal_pwm_set_high_duty(uint8_t pwm_id, uint32_t period);
+
+uint32_t hal_pwm_get_pscaler(uint8_t pwm_id);
+uint32_t hal_pwm_get_period(uint8_t pwm_id);
+uint32_t hal_pwm_get_high_duty(uint8_t pwm_id);
 #endif

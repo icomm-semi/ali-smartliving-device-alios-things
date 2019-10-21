@@ -118,7 +118,8 @@ typedef enum
 {
     GPIO_PULL_DOWN      = 0,        /**< GPIO Pull Down */
     GPIO_PULL_UP        = 1,         /**< GPIO Pull Up */
-    GPIO_PULL_NONE      = 2
+    GPIO_PULL_NONE      = 2,
+    GPIO_PULL_ERROR     = 3
 } gpio_pull_t;
 
 typedef enum

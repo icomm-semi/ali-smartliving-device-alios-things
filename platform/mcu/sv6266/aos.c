@@ -71,11 +71,12 @@ static void aos_wdt_process() {
 static void wdt_task(void *pdata)
 {
     drv_wdt_init();
-    drv_wdt_enable(SYS_WDT, 6000);
+    drv_wdt_enable(SYS_WDT, 50000);
     drv_wdt_register_isr(SYS_WDT, 255, aos_wdt_process);
     while(1)
     {
         OS_MsDelay(3*1000);
+        //printf("kick\n");
         drv_wdt_kick(SYS_WDT);
     }
     OS_TaskDelete(NULL);
@@ -180,4 +181,35 @@ static void app_start(void)
 void APP_Init(void)
 {
     app_start();
+}
+
+#define M_GPIO_DEFAULT          (0)
+#define M_GPIO_USER_DEFINED     (1)
+
+// this will increase current.
+int lowpower_sleep_gpio_hook() ATTRIBUTE_SECTION_FAST_TEXT;
+int lowpower_sleep_gpio_hook() {
+    // do your gpio setting
+    //return M_GPIO_USER_DEFINED;
+    // use default gpio setting.
+    return M_GPIO_USER_DEFINED;
+}
+
+// this will increase current.
+int lowpower_dormant_gpio_hook() ATTRIBUTE_SECTION_FAST_TEXT;
+int lowpower_dormant_gpio_hook() {
+    // do your gpio setting
+    //return M_GPIO_USER_DEFINED;
+    // use default gpio setting.
+    return M_GPIO_DEFAULT;
+}
+
+void lowpower_pre_sleep_hook() ATTRIBUTE_SECTION_FAST_TEXT;
+void lowpower_pre_sleep_hook() {
+    // do nothing
+}
+
+void lowpower_post_sleep_hook() ATTRIBUTE_SECTION_FAST_TEXT;
+void lowpower_post_sleep_hook() {
+    // do nothing
 }

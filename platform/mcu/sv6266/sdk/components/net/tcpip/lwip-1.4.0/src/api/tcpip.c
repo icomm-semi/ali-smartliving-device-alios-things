@@ -64,7 +64,7 @@ static sys_mbox_t mbox;
 sys_mutex_t lock_tcpip_core;
 #endif /* LWIP_TCPIP_CORE_LOCKING */
 static void tcpip_thread(void *arg) ATTRIBUTE_SECTION_FAST;
-
+sys_mutex_t lock_tcpip_apimsg;
 #if LWIP_DEBUG
 u32 g_log_module;
 u32 g_log_min_level;
@@ -350,6 +350,7 @@ err_t
 tcpip_apimsg(struct api_msg *apimsg)
 {
   struct tcpip_msg msg;
+  sys_mutex_lock(&lock_tcpip_apimsg);
 #ifdef LWIP_DEBUG
   /* catch functions that don't set err */
   apimsg->msg.err = ERR_VAL;
@@ -360,9 +361,10 @@ tcpip_apimsg(struct api_msg *apimsg)
     msg.msg.apimsg = apimsg;
     sys_mbox_post(&mbox, &msg);
     sys_arch_sem_wait(&apimsg->msg.conn->op_completed, 0);
+    sys_mutex_unlock(&lock_tcpip_apimsg);
     return apimsg->msg.err;
   }
-
+  sys_mutex_unlock(&lock_tcpip_apimsg);  
   return ERR_VAL;
 }
 
@@ -513,7 +515,9 @@ tcpip_init(tcpip_init_done_fn initfunc, void *arg)
     LWIP_ASSERT("failed to create lock_tcpip_core", 0);
   }
 #endif /* LWIP_TCPIP_CORE_LOCKING */
-
+  if(sys_mutex_new(&lock_tcpip_apimsg) != ERR_OK) {
+    LWIP_ASSERT("failed to create lock_tcpip_apimsg", 0);
+  }
   //sys_thread_new(TCPIP_THREAD_NAME, tcpip_thread, NULL, (TCPIP_STACK_SIZE<<4), TCPIP_PRIORITY);
   sys_thread_new(TCPIP_THREAD_NAME, tcpip_thread, NULL, 1970, OS_TASK_PRIO3);
 

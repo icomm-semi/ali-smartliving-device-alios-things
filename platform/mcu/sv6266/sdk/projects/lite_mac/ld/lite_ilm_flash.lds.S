@@ -2,9 +2,9 @@
 #include "layout_flash_ilm_dlm.lds.S"
 #define M_VMA_AT(section)  AT (ALIGN(LOADADDR(section) + SIZEOF(section), 4) )
 #define M_VMA_AT_START(section)  AT (ALIGN(LOADADDR(section) + SIZEOF(section), 4) )
-#define M_PARAM_SECTOR_SIZE     16K
+#define M_PARAM_SECTOR_SIZE     (8K+SETTING_PARTITION_USER_RAW_SIZE)
 #define M_FLASH_SECTOR_SIZE     4K
-#define M_RAW_SECTOR_SIZE     	8K
+#define M_RAW_SECTOR_SIZE     	SETTING_PARTITION_USER_RAW_SIZE
 #define M_N10_LOOP              0xD500
 
 ENTRY(_start)
@@ -19,6 +19,8 @@ SECTIONS
     PROVIDE (__executable_start = 0x00000000);
     NDS_SAG_LMA_ROM = 0x30000000 ;
     FLASH_BEGIN = NDS_SAG_LMA_ROM;
+
+    __partition_raw_size = M_RAW_SECTOR_SIZE;
 
 #ifndef SUPPORT_BOOTLOADER
 	. = ORIGIN(REGION_BOOT);

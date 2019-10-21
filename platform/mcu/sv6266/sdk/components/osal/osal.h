@@ -60,19 +60,22 @@ typedef void (*OsTask)(void *);
 
 // task priority
 #ifdef CONFIG_OS_RHINO
-	#define OS_TASK_PRIOBASE 32
+	#define OS_TASK_PRIOBASE     32
+	#define OS_TASK_HIGH_PRIO    5
+	#define OS_TASK_MIDDLE_PRIO  10
+	#define OS_TASK_LOW_PRIO     20
 #else
-	#define OS_TASK_PRIOBASE 0
+	#define OS_TASK_PRIOBASE     0
+	#define OS_TASK_HIGH_PRIO    3
+	#define OS_TASK_MIDDLE_PRIO  2
+	#define OS_TASK_LOW_PRIO     1
+	#define OS_TASK_LOWEST_PRIO  0
 #endif
-#if 1
-	#define OS_TASK_PRIO0               0
-	#define OS_TASK_PRIO1               1
-	#define OS_TASK_PRIO2               2
-	#define OS_TASK_PRIO3               3
-	#define OS_TASK_PRIO4               4
-	#define OS_TASK_PRIO5               5
-	#define OS_TASK_PRIO6               6
-	#define OS_TASK_PRIO7               7
+#if                              1
+	#define OS_TASK_PRIO0        0
+	#define OS_TASK_PRIO1        1
+	#define OS_TASK_PRIO2        2
+	#define OS_TASK_PRIO3        3
 #endif
 
 // error value
@@ -147,6 +150,13 @@ unsigned long OS_Random(void);
  * @retval current system tick count
  */
 OS_TICKTYPE OS_GetSysTick(void);
+
+/**
+ * get current system us tick count
+ *
+ * @retval current system tick count
+ */
+uint32_t OS_GetUsSysTick(void);
 
 /* Monitor: */
 void OS_SysInfo(void);
@@ -308,7 +318,7 @@ OS_STATUS OS_SemWait( OsSemaphore Sem , OS_TICKTYPE timeout);
 u32 OS_SemGetCount( OsSemaphore Sem );
 /**
  * signal a semaphore in normal context
- * 
+ *
  * @retval  OS_SUCCESS                  signal a semaphore success
  * @retval  OS_FAILED                   signal a semaphore failed
  */
@@ -336,21 +346,21 @@ OS_STATUS OS_EventDelete(OsEvent event);
  * delay ms
  *
  * @param   ms                    		ms count
- * 
+ *
  */
 void OS_MsDelay(u32 ms);
 /**
  * delay us
  *
  * @param   us                    		us count
- * 
+ *
  */
 void OS_UsDelay(u32 us);
 /**
  * delay tick
  *
  * @param   ticks                    	tick count
- * 
+ *
  */
 void OS_TickDelay(OS_TICKTYPE ticks);
 
