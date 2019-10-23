@@ -148,7 +148,7 @@ static pwr_status_t tickless_timer_init(void)
 static pwr_status_t tickless_one_shot_start(uint64_t sleep_time, cpu_cstate_t c_state_to_enter)
 {
     if (cStateOneShotTimer[c_state_to_enter]->one_shot_start(sleep_time) != PWR_OK) {
-        PWR_DBG(DBG_INFO, "start one shot(%lld ms) fail\n", sleep_time);
+        PWR_DBG(DBG_INFO, "start one shot(%lld us) fail\n", sleep_time);
 
         return (PWR_ERR);
     }
@@ -240,9 +240,9 @@ static void tickless_enter_check(uint32_t cpu_idx, uint32_t cstate_cfg,
     if (n_ticks == RHINO_WAIT_FOREVER) {
         sleep_time_us = TIME_100_YEARS_IN_US;
     } else {
-        if (n_ticks > 1) {
-            n_ticks = n_ticks -1;
-        }
+//        if (n_ticks > 1) {
+//            n_ticks = n_ticks -1;
+//        }
         sleep_time_us = 1000000ull * n_ticks / RHINO_CONFIG_TICKS_PER_SECOND;
     }
 
@@ -277,9 +277,9 @@ static void tickless_enter_check(uint32_t cpu_idx, uint32_t cstate_cfg,
     one_shot_max_us_support = 0;
 
     if ((cStateOneShotTimer[cpu_c_state] != NULL) &&
-        (cStateOneShotTimer[cpu_c_state]->one_shot_seconds_max != NULL)) {
+        (cStateOneShotTimer[cpu_c_state]->one_shot_msec_max != NULL)) {
         one_shot_max_us_support =
-          1000000 * (uint64_t)cStateOneShotTimer[cpu_c_state]->one_shot_seconds_max();
+          1000 * (uint64_t)cStateOneShotTimer[cpu_c_state]->one_shot_msec_max();
     }
 
     /* if request sleeptime is longer than support, cut it down
@@ -289,7 +289,7 @@ static void tickless_enter_check(uint32_t cpu_idx, uint32_t cstate_cfg,
     }
 
     /* real sleep time should be reduced by latency time. */
-    sleep_time_us -= cStateLatency[cpu_idx][cpu_c_state];
+//    sleep_time_us -= cStateLatency[cpu_idx][cpu_c_state];
 
     /* save the real sleep time into p_sleeptime and return. */
     *p_sleeptime = sleep_time_us;
@@ -321,17 +321,22 @@ static void tickless_enter(void)
          * management state. This one shot timer will wakeup the system
          * unless another asynchronous event has woken up the CPU already.
          */
+
+        /* suspend system tick interrupt */
+        //systick_suspend();
         if (tickless_one_shot_start(sleep_time, cstate_to_enter) == PWR_OK) {
             is_current_tickless = TRUE;
+        //} else {
+        //    systick_resume();
         }
     }
 
     c_state_entered = cstate_to_enter;
 
     if (is_current_tickless == TRUE) {
+
         /* suspend system tick interrupt */
         systick_suspend();
-
         /*
          * take CPU into relative C idle state which is decided by
          * tickless_enter_check().
@@ -366,6 +371,9 @@ static void tickless_enter(void)
 
         n_ticks = tickless_one_shot_stop(c_state_entered);
 
+        /* resume system tick interrupt */
+        systick_resume();
+
         /* set is_current_tickless to FALSE */
         is_current_tickless = FALSE;
 
@@ -374,14 +382,13 @@ static void tickless_enter(void)
             tickless_announce_n(n_ticks);
         }
 
-        /* resume system tick interrupt */
-        systick_resume();
      }
 #endif
-    RHINO_CRITICAL_ENTER();
-    RHINO_CRITICAL_EXIT_SCHED();
 
     krhino_spin_unlock_irq_restore(&ticklessSpin);
+
+    RHINO_CRITICAL_ENTER();
+    RHINO_CRITICAL_EXIT_SCHED();
 }
 
 /**
@@ -408,6 +415,9 @@ static void tickless_exit(void)
     /* set is_current_tickless to FALSE */
     is_current_tickless = FALSE;
 
+    /* resume system tick interrupt */
+    systick_resume();
+
     krhino_spin_unlock_irq_restore(&ticklessSpin);
 
     if (n_ticks > 0) {
@@ -415,8 +425,6 @@ static void tickless_exit(void)
         tickless_announce_n(n_ticks);
     }
 
-    /* resume system tick interrupt */
-    systick_resume();
 }
 
 /**

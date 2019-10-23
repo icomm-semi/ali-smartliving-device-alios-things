@@ -27,6 +27,9 @@ extern one_shot_timer_t rtc_one_shot;
 extern one_shot_timer_t standby_rtc_one_shot;
 static cpu_pwr_t cpu_pwr_node_core_0;
 
+extern int g_power_user_force_active;
+extern int g_power_rtc_force_active;
+extern int g_power_xtal_force_active;
 uint32_t g_sleep_us;
 
 /**
@@ -60,6 +63,9 @@ static pwr_status_t board_cpu_c_state_set(uint32_t cpuCState, int master)
             if (krhino_sys_tick_get() > (last_log_entersleep + RHINO_CONFIG_TICKS_PER_SECOND)) {
                 last_log_entersleep = krhino_sys_tick_get();
                 printf("enter standby\r\n");
+                printf("user_active = %d\n", g_power_user_force_active);
+                printf("rtc_active = %d\n", g_power_rtc_force_active);
+                printf("xtal_active = %d\n", g_power_xtal_force_active);
             }
 #endif
             sys_clock_slow_wfi();
@@ -82,19 +88,20 @@ static pwr_status_t board_cpu_c_state_set(uint32_t cpuCState, int master)
 
             // system sleep.
             if (g_sleep_us < (1800)) {
-                //if (hw_tmr_remain_tick_count > 0) {
-                //    g_sleep_us = 1;
-                //}
-                //else {
-                //    g_sleep_us = 0;
-                //}
-                //
-                g_sleep_us = 1;
+                if (g_sleep_us > 0) {
+                    if (g_sleep_us != hw_tmr_remain_tick_count) {
+                        system_delay(system_us2delaytick(g_sleep_us));
+                    } else {
+                        // hardware timer will wakeup.
+                        sys_clock_slow_wfi();
+                    }
+                }
             } else {
 #if 1
                 // disable timer clock.
                 uint32_t clk = sys_stop_clk();
 
+                //system_delay(system_us2delaytick(g_sleep_us));
                 g_sleep_us = sys_sleep(g_sleep_us);
 
                 // restore timer clock.

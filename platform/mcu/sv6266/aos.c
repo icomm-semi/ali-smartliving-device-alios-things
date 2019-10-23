@@ -27,6 +27,7 @@
 #include "wdt/drv_wdt.h"
 #include "gpio/drv_gpio.h"
 #include "drv_uart.h"
+#include "hal/soc/soc.h"
 
 #if defined (VCALL_RHINO)
 #if defined (CONFIG_AOS_CLI)
@@ -107,7 +108,7 @@ void isr_gpio_12()
 {
     drv_gpio_intc_clear(GPIO_12);
     //aos_schedule_call(do_awss_reset, NULL);
-    REG32(0xc0000c00) = '?';
+    //REG32(0xc0000c00) = '?';
 //    REG32(0xc0000c00) = '1';
 //    REG32(0xc0000c00) = '2';
 //    REG32(0xc0000c00) = '\n';
@@ -117,13 +118,14 @@ void isr_gpio_11()
 {
     drv_gpio_intc_clear(GPIO_11);
     //aos_schedule_call(do_awss_active, NULL);
-    REG32(0xc0000c00) = '!';
+    //REG32(0xc0000c00) = '!';
 //    REG32(0xc0000c00) = '1';
 //    REG32(0xc0000c00) = '1';
 //    REG32(0xc0000c00) = '\n';
 }
 
 
+extern uart_dev_t uart_0;
 
 static void app_start(void)
 {
@@ -138,10 +140,11 @@ static void app_start(void)
     drv_uart_init();
     drv_uart_set_fifo(UART_INT_RXFIFO_TRGLVL_1, 0x0);
     drv_uart_set_format(921600, UART_WORD_LEN_8, UART_STOP_BIT_1, UART_PARITY_DISABLE);
-    drv_uart_register_isr(UART_DATA_RDY_IE, uart_rx_isr);
+    //drv_uart_register_isr(UART_DATA_RDY_IE, uart_rx_isr);
     
     OS_Init();
     OS_MemInit();
+    hal_uart_init (&uart_0);
     //OS_PsramInit();
 
     load_rf_table_from_flash();
@@ -158,16 +161,16 @@ static void app_start(void)
         dump_rf_table();
     }
 
-    drv_gpio_set_dir(GPIO_12, GPIO_DIR_IN);
-    drv_gpio_set_dir(GPIO_11, GPIO_DIR_IN);
-    drv_gpio_set_pull(GPIO_12, GPIO_PULL_UP);
-    drv_gpio_set_pull(GPIO_11, GPIO_PULL_UP);
+    //drv_gpio_set_dir(GPIO_12, GPIO_DIR_IN);
+    //drv_gpio_set_dir(GPIO_11, GPIO_DIR_IN);
+    //drv_gpio_set_pull(GPIO_12, GPIO_PULL_UP);
+    //drv_gpio_set_pull(GPIO_11, GPIO_PULL_UP);
 
-    drv_gpio_intc_trigger_mode(GPIO_12, GPIO_INTC_FALLING_EDGE);
-    drv_gpio_intc_trigger_mode(GPIO_11, GPIO_INTC_FALLING_EDGE);
+    //drv_gpio_intc_trigger_mode(GPIO_12, GPIO_INTC_FALLING_EDGE);
+    //drv_gpio_intc_trigger_mode(GPIO_11, GPIO_INTC_FALLING_EDGE);
 
-    drv_gpio_register_isr(GPIO_12, isr_gpio_12);
-    drv_gpio_register_isr(GPIO_11, isr_gpio_11);
+    //drv_gpio_register_isr(GPIO_12, isr_gpio_12);
+    //drv_gpio_register_isr(GPIO_11, isr_gpio_11);
     
     OS_TaskCreate(ssvradio_init_task, "ssvradio_init", 512, NULL, 1, NULL);
 #if defined(CONFIG_ENABLE_WDT)
@@ -192,7 +195,8 @@ int lowpower_sleep_gpio_hook() {
     // do your gpio setting
     //return M_GPIO_USER_DEFINED;
     // use default gpio setting.
-    return M_GPIO_USER_DEFINED;
+    //return M_GPIO_USER_DEFINED;
+    return M_GPIO_DEFAULT;
 }
 
 // this will increase current.
