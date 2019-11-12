@@ -21,6 +21,7 @@ provides low-level interface for setting CPU P-states.
 #include <pwrmgmt_debug.h>
 #include <cpu_tickless.h>
 #include <lowpower.h>
+#include <wificonf.h>
 #define REG32(reg) (*(uint32_t volatile *)(reg))
 
 extern one_shot_timer_t rtc_one_shot;
@@ -166,12 +167,11 @@ pwr_status_t board_cpu_pwr_init(void)
     }
 
     /*
-     * According reference manual of STM32L496G-DISCOVERY
+     * According reference manual of SV6266
      *
      * C0 - RUN,  Power supplies are on,all clocks are on.
-     * C1 - Sleep mode, CPU clock off, all peripherals including
-     *      Cortex®-M4 core peripherals such as NVIC, SysTick, etc. can run
-     *      and wake up the CPU when an interrupt or an event occurs.
+     * C1 - Standby mode, MCU clock off.
+     * C1 - Sleep mode, MCU clock off, only GPIO, RTC can wake up the system.
      */
 
     retVal = cpu_pwr_c_method_set(cpuIndex, board_cpu_c_state_set);
@@ -193,9 +193,10 @@ pwr_status_t board_cpu_pwr_init(void)
     }
 
     /*
-     * According reference manual of STM32L496G-DISCOVERY,
+     * According reference manual of SV6266
      * the wakeup latency of Cx is:
-     * resume from C1 (Low Power mode)       : immediate
+     * resume from C1 (Standby mode)       : immediate
+     * resume from C2 (Sleep mode)         : 2000uS
      */
     cpu_pwr_c_state_latency_save(cpuIndex, CPU_CSTATE_C0, 0);
     cpu_pwr_c_state_latency_save(cpuIndex, CPU_CSTATE_C1, 0);
@@ -220,7 +221,7 @@ pwr_status_t board_cpu_pwr_init(void)
     cpu_pwr_state_show();
 #endif
 
-#if (WIFI_CONFIG_SUPPORT_LOWPOWER > 0)
+#if defined(RHINO_CONFIG_CPU_PWR_MGMT) && (RHINO_CONFIG_CPU_PWR_MGMT == 1)
     lowpower_mode(E_LOW_POWER_SLEEP);
 #endif
 
@@ -231,11 +232,13 @@ int pwrmgmt_suspend_lowpower() {
     CPSR_ALLOC();
     RHINO_CRITICAL_ENTER();
     //add code to suspend cpu sleep
+#if defined(RHINO_CONFIG_CPU_PWR_MGMT) && (RHINO_CONFIG_CPU_PWR_MGMT == 1)
+    lowpower_mode(E_LOW_POWER_ACTIVE);
+#endif
     RHINO_CRITICAL_EXIT_SCHED();
 #if (WIFI_CONFIG_SUPPORT_LOWPOWER > 0)
     //add code to suspend wifi lowpower
-    //printf("[%s]!!!!!!!!!!!\n", __func__);
-    lowpower_mode(E_LOW_POWER_ACTIVE);
+    set_power_mode(0, DUT_STA);
 #endif
     return 1;
 }
@@ -244,11 +247,13 @@ int pwrmgmt_resume_lowpower() {
     CPSR_ALLOC();
     RHINO_CRITICAL_ENTER();
     //add code to resume cpu sleep
+#if defined(RHINO_CONFIG_CPU_PWR_MGMT) && (RHINO_CONFIG_CPU_PWR_MGMT == 1)
+    lowpower_mode(E_LOW_POWER_SLEEP);
+#endif
     RHINO_CRITICAL_EXIT_SCHED();
 #if (WIFI_CONFIG_SUPPORT_LOWPOWER > 0)
     //add code to resume wifi lowpower
-    //printf("[%s]!!!!!!!!!!!\n", __func__);
-    lowpower_mode(E_LOW_POWER_SLEEP);
+    set_power_mode(1, DUT_STA);
 #endif
     return 1;
 }

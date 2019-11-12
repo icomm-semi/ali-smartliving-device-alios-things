@@ -418,6 +418,12 @@ int wifi_unregister_mac_send_cb(void (*mac_send_debug_cb)(void *data));
 int wifi_register_radio_send_cb(void (*radio_send_debug_cb)(void *data));
 int wifi_unregister_radio_send_cb(void (*radio_send_debug_cb)(void *data));
 
+/**
+ * @brief Enable/Disable softap hidden ssid.
+ * @param staid	         [IN] 1 : enable. 0 : disable.
+ * @return 0 : ok -1 : fail
+ */
+ int wifi_ap_set_hidden_ssid(u8 enable);
 
 /**
  *@ configure the amout of ap list. This function should be called before DUT_START

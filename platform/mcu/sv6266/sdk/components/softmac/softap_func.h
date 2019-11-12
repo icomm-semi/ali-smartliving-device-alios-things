@@ -24,6 +24,7 @@ typedef struct
 
 	s8 ssid_length;
 	s8 ssid[32];
+	s8 ssid_hidden;
 } SOFTAP_CUSTOM_CONFIG;
 
 
@@ -34,7 +35,7 @@ int32_t softap_exit();
 void softap_rx_authenticate(struct ieee80211_hdr_3addr * mgmt);
 void softap_rx_disassoc(struct ieee80211_hdr_3addr * mgmt);
 void softap_rx_deauth(struct ieee80211_hdr_3addr * mgmt);
-
+int softap_set_hidden_ssid_en(u8 en);
 #if (ENABLE_HK==1) 
 void softap_enable_hk_support();
 void softap_disable_hk_support();

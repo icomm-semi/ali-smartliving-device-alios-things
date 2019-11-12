@@ -296,6 +296,7 @@ int At_SET_APCONFIG (stParam *param)
         return ERROR_INVALID_PARAMETER;
     }
 
+	memset(&isoftap_custom_config, 0, sizeof(SOFTAP_CUSTOM_CONFIG));
 	isoftap_custom_config.start_ip = strtoul(param->argv[0], NULL, 16);
 	isoftap_custom_config.end_ip = strtoul(param->argv[1], NULL, 16);
 	isoftap_custom_config.gw = strtoul(param->argv[2], NULL, 16);
@@ -1973,8 +1974,11 @@ int At_Connect (stParam *param)
     }
 
     //if AP is open but user set password, we will return fail
-    if( (gwifistatus.connAP[0].security_type == 0 || gwifistatus.connAP[0].security_subType == 0) && gwifistatus.connAP[0].key_len != 0 )
+    if( (gwifistatus.connAP[0].security_type == 0 ) && gwifistatus.connAP[0].key_len != 0 )
+	{
+		printf("\nWIFI Disconnect\n");
         return ERROR_WIFI_CONNECTION;
+    }	
     
     wifi_connect(atwificbfunc);
     return ERROR_SUCCESS_NO_RSP;
@@ -2274,6 +2278,23 @@ int At_ShowAllAP (stParam *param)
     return ERROR_SUCCESS;
 }
 /*---------------------------------------------------------------------------*/
+int At_SET_AP_HIDDENID(stParam *param)
+{
+    u32 val=0;
+    if (param->argc == 1)
+    {
+        val = strtoul(param->argv[0], NULL, 10);
+        if(val < 0xFF)
+        {
+            return wifi_ap_set_hidden_ssid((u8)val);
+        }
+        else
+            return ERROR_INVALID_PARAMETER;
+    }
+    else
+        return ERROR_INVALID_PARAMETER;
+}
+
 int At_GetVersion (stParam *param)
 {
     printf("\r\n");
@@ -3226,6 +3247,7 @@ const at_cmd_info atcmdicomm_info_tbl[] =
     {ATCMD_GET_APMODE,         At_GET_APMODE,         0},
     {ATCMD_HKAP,               At_HKAP,               0},
     {ATCMD_LIST_STA,         At_ListStation,         0},
+    {ATCMD_SET_AP_HIDDENID,    At_SET_AP_HIDDENID,    0},
 
 #if 0    
     {ATCMD_IPCONF,             At_GetIPconf,          0},

@@ -490,6 +490,7 @@ typedef struct t_IEEE80211STATUS
 	OsBufQ        softap_eapol_que;
 	OsBufQ        softap_txdeauth_que;
     u8 softap_state;
+    u8 softap_hidden_ssid;
 //	u8 softap_gw_digit[3];	//gateway setting!!
 
 	u32 softap_start_ip;	//ex:172.31.254.240

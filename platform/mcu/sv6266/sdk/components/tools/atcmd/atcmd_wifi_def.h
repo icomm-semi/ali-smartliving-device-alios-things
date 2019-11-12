@@ -176,6 +176,7 @@
 #define ATCMD_GET_APCONFIG          ("AT+GET_APCONFIG")
 #define ATCMD_GET_APMODE            ("AT+GET_APMODE")
 #define ATCMD_AP_EXIT               ("AT+AP_EXIT")
+#define ATCMD_SET_AP_HIDDENID       ("AT+SET_AP_HIDDENID")
 
 #define ATCMD_LIST_STA                    "AT+LIST_STA"
 //#define ATCMD_KICK_STA                    "AT+KICK_STA"
