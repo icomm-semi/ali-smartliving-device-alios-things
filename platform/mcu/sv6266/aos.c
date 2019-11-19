@@ -80,7 +80,7 @@ static void wdt_task(void *pdata)
     while(1)
     {
         OS_MsDelay(3*1000);
-        printf("kick\n");
+    //    printf("kick\n");
         drv_wdt_kick(SYS_WDT);
     }
     OS_TaskDelete(NULL);
