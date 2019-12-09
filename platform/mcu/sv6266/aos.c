@@ -28,6 +28,7 @@
 #include "gpio/drv_gpio.h"
 #include "drv_uart.h"
 #include "hal/soc/soc.h"
+#include <cJSON.h>
 
 #if defined (VCALL_RHINO)
 #if defined (CONFIG_AOS_CLI)
@@ -106,6 +107,102 @@ static void system_init(void)
     aos_kernel_init(&kinit);
 }
 
+#define FLASH_USER_MAP	(0x30000000+0x6000)
+typedef struct
+{
+	char *key;
+	char *kv_str;
+}user_data_info_t;
+
+static user_data_info_t user_data_info[]=
+{
+	{"PRODUCT_KEY",		"linkkit_product_key"},
+	{"PRODUCT_SECRET",	"linkkit_product_secret"},
+	{"DEVICE_NAME",		"linkkit_device_name"},
+	{"DEVICE_SECRET",	"linkkit_device_secret"},
+};
+
+
+static int8_t user_data_init()
+{
+	cJSON *cjson_hd = NULL;
+	cJSON *wifi_cfg_hd = NULL;
+	cJSON *obj_ptr = NULL;
+	char *tmpchar = NULL;
+	int i;
+
+	printf("user header val 0x%x\n",*(volatile uint32_t *) FLASH_USER_MAP);
+	if(*(volatile uint32_t *) FLASH_USER_MAP != 0x55aa55aa)
+	{
+		printf("user_data not set\n");
+		return -1;
+	}
+
+	cjson_hd = cJSON_Parse((int8_t *)(FLASH_USER_MAP + sizeof(uint32_t)));
+	if(cjson_hd == NULL)
+	{
+		printf("user_data cjson error\n");
+		return -1;
+	}
+
+//set MAC address info
+	wifi_cfg_hd = wifi_cfg_init();
+
+	obj_ptr = cJSON_GetObjectItem(cjson_hd, "MAC1");
+	if(obj_ptr != NULL)
+	{
+		tmpchar = obj_ptr->valuestring;
+		printf("%s set MAC1 %s\n",__func__,tmpchar);
+		wifi_cfg_replace_mem_addr1(wifi_cfg_hd,tmpchar);
+		tmpchar = NULL;
+	}
+
+	obj_ptr = cJSON_GetObjectItem(cjson_hd, "MAC2");
+	if(obj_ptr != NULL)
+	{
+		tmpchar = obj_ptr->valuestring;
+		printf("%s set MAC2 %s\n",__func__,tmpchar);
+		wifi_cfg_replace_mem_addr2(wifi_cfg_hd,tmpchar);
+		tmpchar = NULL;
+	}
+	wifi_cfg_write_cfg(wifi_cfg_hd);
+
+	wifi_cfg_deinit(wifi_cfg_hd);
+
+//get -set alios product info
+	for(i=0; i<sizeof(user_data_info)/sizeof(user_data_info[0]); i++)
+	{
+		obj_ptr = cJSON_GetObjectItem(cjson_hd, user_data_info[i].key);
+		if(obj_ptr != NULL)
+		{
+			tmpchar = obj_ptr->valuestring;
+			aos_kv_set(user_data_info[i].kv_str, tmpchar, strlen(tmpchar) + 1, 1);		
+			printf("user data %s:%s\n",user_data_info[i].kv_str,tmpchar);
+		}
+	}
+
+	cJSON_Delete(cjson_hd);
+
+	return 0;
+}
+
+static void burn_info_process_task(void *pdata)
+{
+	uint32_t val = 0;
+	OS_MsDelay(1*1000);
+	if(user_data_init() == 0)
+	{
+//clear flash header
+		cfg_user_write_cfg(&val,sizeof(uint32_t));
+		printf("Reboot to Reflash burn InFo......\n");
+		drv_wdt_init();
+		drv_wdt_enable(SYS_WDT, 500);
+		while(1);
+	}
+	OS_TaskDelete(NULL);
+
+}
+
 static void do_awss_reset();
 void isr_gpio_12()
 {
@@ -176,6 +273,7 @@ static void app_start(void)
     //drv_gpio_register_isr(GPIO_11, isr_gpio_11);
     
     OS_TaskCreate(ssvradio_init_task, "ssvradio_init", 512, NULL, 1, NULL);
+    OS_TaskCreate(burn_info_process_task, "burn_info_process_task", 512, NULL, 1, NULL);
 #if defined(CONFIG_ENABLE_WDT)
     OS_TaskCreate(wdt_task, "wdt", 256+128, NULL, 15, NULL);
 #endif
