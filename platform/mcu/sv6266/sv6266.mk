@@ -53,7 +53,8 @@ $(NAME)_PREBUILT_LIBRARY += lib/drv_uart.a
 $(NAME)_PREBUILT_LIBRARY += lib/lowpower.a
 $(NAME)_PREBUILT_LIBRARY += lib/pwm.a
 $(NAME)_PREBUILT_LIBRARY += lib/adc.a
-
+$(NAME)_PREBUILT_LIBRARY += lib/dmac.a
+$(NAME)_PREBUILT_LIBRARY += lib/spimst.a
 
 GLOBAL_INCLUDES += port
 
@@ -64,6 +65,8 @@ GLOBAL_INCLUDES += $(SDKDIR)/components/osal
 GLOBAL_INCLUDES += $(SDKDIR)/components/inc
 GLOBAL_INCLUDES += $(SDKDIR)/components/drv/gpio
 GLOBAL_INCLUDES += $(SDKDIR)/components
+GLOBAL_INCLUDES += $(SDKDIR)/components/drv/spimst
+GLOBAL_INCLUDES += $(SDKDIR)/components/drv/dmac
 GLOBAL_INCLUDES += $(SDKDIR)/components/tools/atcmd
 GLOBAL_INCLUDES += $(SDKDIR)/components/drv/tmr
 GLOBAL_INCLUDES += $(SDKDIR)/components/inc/crypto \
@@ -80,6 +83,8 @@ GLOBAL_INCLUDES += inc/custom
 ################################################################
 # Project header
 ################################################################
+SSV_BLE_7050 := 1
+
 XIP_MODE := 1
 ifeq ($(strip $(XIP_MODE)), 1)
 GLOBAL_DEFINES += XIP_MODE
@@ -221,3 +226,37 @@ $(NAME)_SOURCES :=	aos.c \
 	hal/pwrmgmt_hal/board_cpu_pwr_standby_rtc.c \
 	hal/pwrmgmt_hal/board_cpu_pwr_systick.c \
 	hal/pwrmgmt_hal/board_cpu_pwr.c
+
+ifeq ($(strip $(SSV_BLE_7050)), 1)
+$(NAME)_SOURCES += \
+			hal/ble.c  \
+		    hal/ble/ievt_handler.c  \
+		    hal/ble/get_ievt.c  \
+		    hal/ble/icmd_wakelock.c  \
+		    hal/ble/terminal.c  \
+		    hal/ble/ble_bsp.c  \
+		    hal/ble/icmd_patch_v3105.c  \
+		    hal/ble/icmd_interface_hal_spi.c  \
+		    hal/ble/icmd_interface_spi.c  \
+		    hal/ble/ble_main.c  \
+		    hal/ble/ble_transport_api.c  \
+		    hal/ble/icmd2load.c  \
+		    ../../../framework/bluetooth/breeze/hal/ble/breeze_hal_os.c \
+			../../../framework/bluetooth/breeze/hal/ble/breeze_hal_sec.c \
+			../../../framework/bluetooth/breeze/hal/ble/aes.c
+
+GLOBAL_INCLUDES += \
+		   ../../../kernel/protocols/bluetooth/include \
+		   ../../../framework/bluetooth/breeze/hal/ble/include/mbedtls \
+		   ../../../framework/bluetooth/breeze/hal/include
+		
+
+$(NAME)_INCLUDES += hal/ble/include
+$(NAME)_INCLUDES += hal
+$(NAME)_INCLUDES += hal/ble
+		   
+GLOBAL_CFLAGS            += -DBLE_4_2
+btstack=icomm
+endif
+
+

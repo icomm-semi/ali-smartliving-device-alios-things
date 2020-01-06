@@ -112,14 +112,16 @@ typedef struct
 {
 	char *key;
 	char *kv_str;
+	char *kv_val;
 }user_data_info_t;
 
 static user_data_info_t user_data_info[]=
 {
-	{"PRODUCT_KEY",		"linkkit_product_key"},
-	{"PRODUCT_SECRET",	"linkkit_product_secret"},
-	{"DEVICE_NAME",		"linkkit_device_name"},
-	{"DEVICE_SECRET",	"linkkit_device_secret"},
+	{"PRODUCT_KEY",		"linkkit_product_key",	NULL},
+	{"PRODUCT_SECRET",	"linkkit_product_secret",	NULL},
+	{"DEVICE_NAME",		"linkkit_device_name",	NULL},
+	{"DEVICE_SECRET",	"linkkit_device_secret",	NULL},
+	{"PRODUCT_ID",		"linkkit_product_id",	NULL},		//only for ble awss	
 };
 
 
@@ -129,6 +131,7 @@ static int8_t user_data_init()
 	cJSON *wifi_cfg_hd = NULL;
 	cJSON *obj_ptr = NULL;
 	char *tmpchar = NULL;
+	char soclicense[100];
 	int i;
 
 	printf("user header val 0x%x\n",*(volatile uint32_t *) FLASH_USER_MAP);
@@ -176,11 +179,28 @@ static int8_t user_data_init()
 		if(obj_ptr != NULL)
 		{
 			tmpchar = obj_ptr->valuestring;
-			aos_kv_set(user_data_info[i].kv_str, tmpchar, strlen(tmpchar) + 1, 1);		
+			aos_kv_set(user_data_info[i].kv_str, tmpchar, strlen(tmpchar) + 1, 1);
+			user_data_info[i].kv_val = tmpchar;
 			printf("user data %s:%s\n",user_data_info[i].kv_str,tmpchar);
 		}
 	}
 
+	if(user_data_info[0].kv_val == NULL || \
+		user_data_info[1].kv_val == NULL || \
+		user_data_info[2].kv_val == NULL || \
+		user_data_info[3].kv_val == NULL )
+	{
+		return 0;
+	}
+	memset(soclicense, 0, sizeof(soclicense));
+	snprintf(soclicense, sizeof(soclicense),"%s,%s,%s,%s",\
+		user_data_info[0].kv_val,\
+		user_data_info[1].kv_val,
+		user_data_info[2].kv_val,
+		user_data_info[3].kv_val);
+	
+	aos_kv_set("SOCLICENSE",soclicense,strlen(soclicense)+1,1);
+	printf("user data SOCLICENSE set: %s\n",soclicense);
 	cJSON_Delete(cjson_hd);
 
 	return 0;
